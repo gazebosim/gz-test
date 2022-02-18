@@ -1,0 +1,11 @@
+name: simple-test
+description: "A simple test case"
+configuration:
+  world: empty.sdf
+  models:
+    - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/X1 UGV"
+      pose: { x: 0.0, y: 0.0, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 0.0 }
+      name: x1-a
+    - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/X1 UGV"
+      pose: { x: 1.0, y: 0.0, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 0.0 }
+      name: x1-b
