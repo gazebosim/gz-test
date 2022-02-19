@@ -9,3 +9,18 @@ configuration:
     - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/X1 UGV"
       pose: { x: 1.0, y: 0.0, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 0.0 }
       name: x1-b
+test:
+  # 1. - Take an action
+  #    - Measure an outcome
+  # 2. Repeat. 
+  #   This will end up defining the robot's control structure.
+  #   We could try to encode a behavior tree...
+  #
+  #
+  # What you really want is a start signal, that the robot's control code
+  # can consume.
+  # Then, you want to specify some expectations.
+  # Then, you want to specify some termination criteria.
+  # Then, you *might* want to do some post processing (plot pose of object
+  # X over time, overlay trajectory on map and show collisions).
+  

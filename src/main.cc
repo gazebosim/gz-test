@@ -89,10 +89,12 @@ int main(int argc, char **argv)
         {
           std::string uri = (*it)["uri"].as<std::string>();
           std::string modelPath = fuel_tools::fetchResource(uri);
-          std::string modelSdfFile = fuel_tools::modelSdfFromPath(modelPath);
-          std::cout << "ModelPath[" << modelPath << "] SDF File[" << modelSdfFile << "]\n";
+          std::string modelSdfFile = fuel_tools::sdfFromPath(modelPath);
+          sdf::Errors errors = model.LoadSdfFile(modelSdfFile);
 
-          std::cout << "ModelPath[" << modelPath << "]\n";
+          for (sdf::Error &err : errors)
+            std::cout << err.Message() << std::endl;
+
           model.SetUri(uri);
         }
         else
@@ -165,8 +167,8 @@ int main(int argc, char **argv)
   serverConfig.SetSdfRoot(root);
 
   // 1. Load a scenario file.
-  //     a. Load the world.
-  //     b. Place objects.
+  //     a. X Load the world.
+  //     b. X Place objects.
   //     c. Apply initial forces and joint positions.
   //     d. Create triggers
   //         - Time-based
