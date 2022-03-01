@@ -1,5 +1,6 @@
 #include <ignition/gazebo/Link.hh>
 #include <ignition/gazebo/Model.hh>
+#include <ignition/gazebo/components/Pose.hh>
 
 #include "TimeTrigger.hh"
 
@@ -40,8 +41,16 @@ void TimeTrigger::PostUpdate(const gazebo::UpdateInfo &_info,
   if (_info.simTime >= this->time && !this->triggered)
   {
     std::cout << "Time trigger at time[" << _info.simTime.count() << "]\n";
-    gazebo::Model model(this->world.ModelByName(_ecm, "sphere"));
-    std::cout << "pose[" << *(gazebo::Link(model.Links(_ecm)[0]).WorldPose(_ecm)) << "]\n";
+    std::string name = "x1-b";
+    if (this->world.ModelByName(_ecm, name))
+    {
+      gazebo::Model model(this->world.ModelByName(_ecm, name));
+      auto pose = _ecm.ComponentData<gazebo::components::Pose>(model.Entity());
+      if (pose)
+      {
+      std::cout << "Model Name[" << model.Name(_ecm) << "] pose[" << *pose << "]\n";
+      }
+    }
 
     this->triggered = true;
   }

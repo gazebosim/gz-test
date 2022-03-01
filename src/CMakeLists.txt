@@ -3,6 +3,7 @@
 #ign_create_core_library(SOURCES ${sources} CXX_STANDARD ${c++standard})
 
 set (sources
+  Scenario.cc
   Trigger.cc
   TimeTrigger.cc
 )
