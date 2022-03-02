@@ -13,8 +13,7 @@ class Test::Implementation
   /// \brief Copy constructor
   public: Implementation(const Test::Implementation &_impl)
           : name(_impl.name), triggers(_impl.triggers)
-  {
-  }
+  {}
 
   /// \brief The test name
   public: std::string name;
@@ -30,12 +29,6 @@ Test::Test()
 }
 
 /////////////////////////////////////////////////
-/*Test::Test(const Test &_test)
-  : dataPtr(utils::MakeImpl<Implementation>(_test))
-{
-}
-*/
-/////////////////////////////////////////////////
 bool Test::Load(const YAML::Node &_node)
 {
   // The test name
@@ -49,10 +42,6 @@ bool Test::Load(const YAML::Node &_node)
     std::string triggerType = (*it)["type"].as<std::string>();
     if (triggerType == "time")
     {
-      /*std::shared_ptr<TimeTrigger> trigger = std::make_shared<TimeTrigger>();
-      timeTrigger->Load(*it);
-      this->triggers.push_back(timeTrigger);
-      */
       TimeTrigger trigger;
       trigger.Load(*it);
       this->dataPtr->triggers.push_back(std::move(trigger));
