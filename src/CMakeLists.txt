@@ -4,6 +4,7 @@
 
 set (sources
   Scenario.cc
+  Test.cc
   Trigger.cc
   TimeTrigger.cc
 )

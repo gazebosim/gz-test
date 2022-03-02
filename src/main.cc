@@ -45,6 +45,7 @@ int main(int argc, char **argv)
 
   CLI11_PARSE(app, argc, argv);
 
+  ignition::common::Console::SetVerbosity(4);
   Scenario scenario;
   if (!scenario.Load(scenarioFilename))
   {
