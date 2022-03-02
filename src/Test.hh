@@ -16,10 +16,6 @@ namespace ignition
     /// \brief Default constructor.
     public: Test();
 
-    /// \brief Copy constructor.
-    /// \param[in] _test Test to copy.
-//    public: Test(const Test &_test);
-
     /// \brief Load a test.
     /// \param[in] _node The YAML node containing test information
     /// \return True if the test was loaded successfully.

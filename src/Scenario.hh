@@ -15,19 +15,10 @@ namespace ignition
     /// \brief Default constructor.
     public: Scenario();
 
-    /// \brief Copy constructor.
-    /// \param[in] _scenario Scenario to copy;
-    // public: Scenario(const Scenario &_scenario);
-
-    /// \brief Move constructor.
-    /// \param[in] _scenario Scenario to move;
-    // public: Scenario(Scenario &&_scenario) noexcept;
-
     /// \brief Load a scenario file.
     /// \param[in] _filename The scenario filename
     /// \return True if the file was loaded successfully.
     public: bool Load(const std::string &_filename);
-
 
     /// \brief Execute the loaded scenario.
     public: void Run();
@@ -51,12 +42,8 @@ namespace ignition
     /// Load.
     /// \return A copy of the SDF Root object.
     public: gazebo::ServerConfig ServerConfig() const;
+
     public: void SetServerConfig(const gazebo::ServerConfig &_config);
-
-    /*public: Scenario &operator=(const Scenario &_scenario);
-
-    public: Scenario &operator=(Scenario &&_scenario) noexcept;
-    */
 
     /// \brief Private data pointer.
     IGN_UTILS_IMPL_PTR(dataPtr)
