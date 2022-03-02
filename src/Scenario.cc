@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
 #include <yaml-cpp/yaml.h>
 
 #include <sdf/Model.hh>
@@ -149,19 +165,6 @@ Scenario::Scenario()
 }
 
 /////////////////////////////////////////////////
-/*Scenario::Scenario(const Scenario &_scenario)
-  : dataPtr(utils::MakeImpl<Implementation>())
-{
-  *this = _scenario;
-}*/
-
-/////////////////////////////////////////////////
-/*Scenario::Scenario(Scenario &&_scenario) noexcept
-{
-  this->dataPtr = std::move(_plugin.dataPtr);
-}*/
-
-/////////////////////////////////////////////////
 bool Scenario::Load(const std::string &_filename)
 {
   // Try to parse the scenario file.
@@ -239,41 +242,10 @@ bool Scenario::Load(const std::string &_filename)
 //////////////////////////////////////////////////
 void Scenario::Run()
 {
-
-  /*using namespace std::chrono_literals;
-  std::shared_ptr<TimeTrigger> trigger = std::make_shared<TimeTrigger>(2s);
-  server->AddSystem(trigger);
-  */
   igndbg << "Running the server" << std::endl;
 
   this->dataPtr->server->Run(true, 20000, false);
 }
-
-//////////////////////////////////////////////////
-/*Scenario &Scenario::operator=(const Scenario &_scenario)
-{
-  this->SetName(_scenario.Name());
-  this->SetDescription(_scenario.Description());
-  this->SetWorldFilename(_scenario.WorldFilename());
-  this->SetModels(_scenario.Models());
-  this->SetTests(_scenario.Tests());
-  this->SetServerConfig(_scenario.ServerConfig());
-
-  if (_scenario.dataPtr->server)
-  {
-    this->dataPtr->server =
-      std::make_unique<gazebo::Server>(this->dataPtr->serverConfig);
-  }
-
-  return *this;
-}
-
-//////////////////////////////////////////////////
-Scenario &Scenario::operator=(Scenario &&_scenario) noexcept
-{
-  this->dataPtr = std::move(_scenario.dataPtr);
-  return *this;
-}*/
 
 //////////////////////////////////////////////////
 std::string Scenario::Name() const

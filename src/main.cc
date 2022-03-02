@@ -32,20 +32,24 @@ int main(int argc, char **argv)
 {
   CLI::App app{"Test runner"};
   app.set_help_all_flag("--help-all", "Show all help");
-  app.add_flag_callback("-v,--version", [](){
+  app.add_flag_callback("--version", [](){
       std::cout << IGNITION_TEST_VERSION_FULL << std::endl;
       throw CLI::Success();
   });
 
   std::string scenarioFilename = "";
+  int verbose = 1;
   app.add_option("-s,--scenario-file",
       scenarioFilename, "Specify the scenario file")
     ->required()
     ->check(CLI::ExistingFile);
 
+  app.add_option("-v,--verbose",
+      verbose, "Verbosity level");
+
   CLI11_PARSE(app, argc, argv);
 
-  ignition::common::Console::SetVerbosity(4);
+  ignition::common::Console::SetVerbosity(verbose);
   Scenario scenario;
   if (!scenario.Load(scenarioFilename))
   {
