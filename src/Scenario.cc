@@ -49,12 +49,6 @@ class Scenario::Implementation
             this->tests = _impl.tests;
             this->serverConfig = _impl.serverConfig;
 
-            if (_impl.server)
-            {
-              this->server =
-                std::make_unique<gazebo::Server>(this->serverConfig);
-            }
-
             return *this;
           }
 
@@ -69,7 +63,7 @@ class Scenario::Implementation
   public: std::vector<Test> tests;
   public: gazebo::ServerConfig serverConfig;
 
-  public: std::unique_ptr<gazebo::Server> server;
+  public: std::string baseLogPath{""};
 };
 
 /////////////////////////////////////////////////
@@ -150,11 +144,8 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
   if (_config["record"])
   {
     YAML::Node recordNode = _config["record"];
-    this->serverConfig.SetUseLogRecord(true);
     if (recordNode["path"])
-    {
-      this->serverConfig.SetLogRecordPath(recordNode["path"].as<std::string>());
-    }
+      this->baseLogPath = recordNode["path"].as<std::string>();
   }
 }
 
@@ -227,14 +218,6 @@ bool Scenario::Load(const std::string &_filename)
     root.WorldByIndex(0)->AddModel(model);
 
   this->dataPtr->serverConfig.SetSdfRoot(root);
-  this->dataPtr->server =
-    std::make_unique<gazebo::Server>(this->dataPtr->serverConfig);
-
-  // Add triggers to the server
-  for (Test &test : this->dataPtr->tests)
-  {
-    test.AddTriggersToServer(*this->dataPtr->server);
-  }
 
   return true;
 }
@@ -242,9 +225,29 @@ bool Scenario::Load(const std::string &_filename)
 //////////////////////////////////////////////////
 void Scenario::Run()
 {
-  igndbg << "Running the server" << std::endl;
+  // Run each test
+  for (Test &test : this->dataPtr->tests)
+  {
+    igndbg << "Running Test[" << test.Name() << "]\n";
 
-  this->dataPtr->server->Run(true, 20000, false);
+    if (!this->dataPtr->baseLogPath.empty())
+    {
+      this->dataPtr->serverConfig.SetUseLogRecord(true);
+      this->dataPtr->serverConfig.SetLogRecordPath(
+          common::joinPaths(this->dataPtr->baseLogPath, test.Name()));
+    }
+    else
+    {
+      this->dataPtr->serverConfig.SetUseLogRecord(false);
+    }
+
+    std::unique_ptr<gazebo::Server> server =
+      std::make_unique<gazebo::Server>(this->dataPtr->serverConfig);
+
+    test.AddTriggersToServer(*server);
+
+    server->Run(true, 20000, false);
+  }
 }
 
 //////////////////////////////////////////////////

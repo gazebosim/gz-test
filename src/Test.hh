@@ -39,6 +39,10 @@ namespace ignition
 
     public: void AddTriggersToServer(gazebo::Server &_server);
 
+    /// \brief Get the test's name.
+    /// \return The name of the test.
+    public: std::string Name() const;
+
     /// \brief Private data pointer.
     IGN_UTILS_IMPL_PTR(dataPtr)
   };

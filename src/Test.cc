@@ -76,3 +76,9 @@ void Test::AddTriggersToServer(gazebo::Server &_server)
     _server.AddSystem(trigger.System());
   }
 }
+
+/////////////////////////////////////////////////
+std::string Test::Name() const
+{
+  return this->dataPtr->name;
+}
