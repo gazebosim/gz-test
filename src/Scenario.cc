@@ -25,6 +25,7 @@
 #include <ignition/gazebo/Server.hh>
 
 #include "Test.hh"
+#include "Util.hh"
 #include "TimeTrigger.hh"
 #include "Scenario.hh"
 
@@ -115,7 +116,7 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
       // Get the model's pose
       if ((*it)["pose"])
       {
-        math::Pose3d pose;
+        /*math::Pose3d pose;
         if ((*it)["pose"]["x"])
           pose.SetX((*it)["pose"]["x"].as<double>());
         if ((*it)["pose"]["y"])
@@ -133,7 +134,8 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
           rot.Z((*it)["pose"]["yaw"].as<double>());
 
         pose.Rot().Euler(rot);
-        model.SetRawPose(pose);
+          */
+        model.SetRawPose(yamlParsePose3d((*it)["pose"]));
       }
 
       this->models.push_back(model);

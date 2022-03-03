@@ -54,7 +54,7 @@ tests:
       - name: region-trigger-1
         type: region
         # This is the pose and dimensions of the region
-        box: {x: 10.0, y: 0.0, z: 0.0, size-x: 1.0, size-y: 1.0, size-z: 1.0}
+        box: {pos: {x: 10.0, y: 0.0, z: 0.0}, size: {x: 1.0, y: 1.0, z: 1.0}}
         # When an entiy enters the regions the following commands are
         # executed.
         on-enter:

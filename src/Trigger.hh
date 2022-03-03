@@ -21,10 +21,15 @@
 #include <ignition/gazebo/Server.hh>
 #include <ignition/gazebo/ServerConfig.hh>
 
+#include "ignition/test/config.hh"
+
 namespace ignition
 {
   namespace test
   {
+    // Inline bracket to help doxygen filtering.
+    inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+
     /// \brief Base class for all test triggers.
     class Trigger
     {
@@ -76,6 +81,7 @@ namespace ignition
       IGN_UTILS_IMPL_PTR(dataPtr)
 
     };
+    }
   }
 }
 #endif

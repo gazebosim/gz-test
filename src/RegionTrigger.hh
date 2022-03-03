@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_TEST_TIMETRIGGER_HH_
-#define IGNITION_TEST_TIMETRIGGER_HH_
+#ifndef IGNITION_TEST_REGIONTRIGGER_HH_
+#define IGNITION_TEST_REGIONTRIGGER_HH_
 
 #include <chrono>
 #include <ignition/gazebo/World.hh>
@@ -27,24 +27,17 @@ namespace ignition
 {
   namespace test
   {
-    // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_TEST_VERSION_NAMESPACE {
-    class TimeTrigger : public Trigger
-    {
-      public: enum class Type
-      {
-        // Simulation time trigger type
-        SIM,
-        // Real time trigger type
-        REAL
-      };
+  // Inline bracket to help doxygen filtering.
+  inline namespace IGNITION_TEST_VERSION_NAMESPACE {
 
+    class RegionTrigger : public Trigger
+    {
       // Default constructor.
-      public: TimeTrigger() = default;
+      public: RegionTrigger() = default;
 
       public: virtual bool Load(const YAML::Node &_node) override;
 
-      private: class TimeTriggerSystem :
+      private: class RegionTriggerSystem :
             public gazebo::System,
             public gazebo::ISystemConfigure,
             public gazebo::ISystemPreUpdate,
@@ -70,13 +63,10 @@ namespace ignition
         public: void PostUpdate(const gazebo::UpdateInfo &_info,
                     const gazebo::EntityComponentManager &_ecm) override;
 
-        public: std::chrono::steady_clock::duration duration;
-
         public: bool triggered{false};
 
         public: gazebo::World world;
-
-        public: TimeTrigger::Type type{TimeTrigger::Type::SIM};
+        public: math::AxisAlignedBox box;
       };
     };
     }

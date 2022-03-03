@@ -15,6 +15,7 @@
  *
 */
 #include <yaml-cpp/yaml.h>
+#include "RegionTrigger.hh"
 #include "TimeTrigger.hh"
 #include "Test.hh"
 
@@ -59,6 +60,12 @@ bool Test::Load(const YAML::Node &_node)
     if (triggerType == "time")
     {
       TimeTrigger trigger;
+      trigger.Load(*it);
+      this->dataPtr->triggers.push_back(std::move(trigger));
+    }
+    else if (triggerType == "region")
+    {
+      RegionTrigger trigger;
       trigger.Load(*it);
       this->dataPtr->triggers.push_back(std::move(trigger));
     }

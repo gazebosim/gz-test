@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Open Source Robotics Foundation
+ * Copyright 2022 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_TEST_TEST_HH_
-#define IGNITION_TEST_TEST_HH_
+#ifndef IGNITION_TEST_UTILS_HH_
+#define IGNITION_TEST_UTILS_HH_
 
 #include <yaml-cpp/yaml.h>
-#include <ignition/utils/ImplPtr.hh>
-
-#include <ignition/gazebo/Server.hh>
-#include <ignition/gazebo/ServerConfig.hh>
+#include <ignition/math/Vector3.hh>
+#include <ignition/math/Pose3.hh>
 
 #include "ignition/test/config.hh"
 
@@ -31,25 +29,8 @@ namespace ignition
   {
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_TEST_VERSION_NAMESPACE {
-    class Test
-    {
-      /// \brief Default constructor.
-      public: Test();
-
-      /// \brief Load a test.
-      /// \param[in] _node The YAML node containing test information
-      /// \return True if the test was loaded successfully.
-      public: bool Load(const YAML::Node &_node);
-
-      public: void AddTriggersToServer(gazebo::Server &_server);
-
-      /// \brief Get the test's name.
-      /// \return The name of the test.
-      public: std::string Name() const;
-
-      /// \brief Private data pointer.
-      IGN_UTILS_IMPL_PTR(dataPtr)
-    };
+      math::Vector3d yamlParseVector3d(const YAML::Node &_node);
+      math::Pose3d yamlParsePose3d(const YAML::Node &_node);
     }
   }
 }
