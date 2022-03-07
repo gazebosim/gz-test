@@ -14,6 +14,7 @@
  * limitations under the License.
  *
 */
+#include <functional>
 #include <ignition/gazebo/Link.hh>
 #include <ignition/gazebo/Model.hh>
 #include <ignition/gazebo/components/Pose.hh>
@@ -53,6 +54,8 @@ void TimeTrigger::TimeTriggerSystem::PostUpdate(const gazebo::UpdateInfo &_info,
   if (_info.simTime >= this->duration && !this->triggered)
   {
     igndbg << "Time trigger at time[" << _info.simTime.count() << "]\n";
+    //this->onCb();
+    // this->trigger->RunOnCommands();
 
     /*std::string name = "x1-b";
     if (this->world.ModelByName(_ecm, name))
@@ -70,9 +73,15 @@ void TimeTrigger::TimeTriggerSystem::PostUpdate(const gazebo::UpdateInfo &_info,
 }
 
 //////////////////////////////////////////////////
+TimeTrigger::TimeTrigger()
+  : Trigger()
+{
+}
+
+//////////////////////////////////////////////////
 bool TimeTrigger::Load(const YAML::Node &_node)
 {
-  auto system = std::make_shared<TimeTrigger::TimeTriggerSystem>();
+  auto sys = std::make_shared<TimeTrigger::TimeTriggerSystem>();
 
   this->SetType(Trigger::TriggerType::TIME);
 
@@ -92,7 +101,7 @@ bool TimeTrigger::Load(const YAML::Node &_node)
     YAML::Node timeNode = _node["time"];
     if (timeNode["duration"])
     {
-      system->duration = math::stringToDuration(
+      sys->duration = math::stringToDuration(
           timeNode["duration"].as<std::string>());
     }
     else
@@ -107,9 +116,9 @@ bool TimeTrigger::Load(const YAML::Node &_node)
       std::string timeType =
         common::lowercase(timeNode["type"].as<std::string>());
       if (timeType == "sim")
-        system->type = TimeTrigger::Type::SIM;
+        sys->type = TimeTrigger::Type::SIM;
       else if (timeType == "real")
-        system->type = TimeTrigger::Type::REAL;
+        sys->type = TimeTrigger::Type::REAL;
       else
       {
         ignerr << "Time trigger[" << this->Name()
@@ -125,9 +134,15 @@ bool TimeTrigger::Load(const YAML::Node &_node)
     return false;
   }
 
-  igndbg << "Created time trigger " << this->Name() << " with duration "
-    << system->duration.count() << std::endl;
+  if (_node["on"])
+  {
+    std::cout << "TimeTrigger load on commands\n";
+    this->LoadOnCommands(_node["on"]);
+  }
 
-  this->SetSystem(system);
+  igndbg << "Created time trigger " << this->Name() << " with duration "
+    << sys->duration.count() << std::endl;
+
+  this->SetSystem(sys);
   return true;
 }

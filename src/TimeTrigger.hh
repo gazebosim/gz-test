@@ -18,6 +18,7 @@
 #define IGNITION_TEST_TIMETRIGGER_HH_
 
 #include <chrono>
+#include <memory>
 #include <ignition/gazebo/World.hh>
 
 #include "ignition/test/config.hh"
@@ -29,7 +30,9 @@ namespace ignition
   {
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_TEST_VERSION_NAMESPACE {
-    class TimeTrigger : public Trigger
+    class TimeTrigger :
+      public Trigger,
+      public std::enable_shared_from_this<TimeTrigger>
     {
       public: enum class Type
       {
@@ -40,7 +43,7 @@ namespace ignition
       };
 
       // Default constructor.
-      public: TimeTrigger() = default;
+      public: TimeTrigger();
 
       public: virtual bool Load(const YAML::Node &_node) override;
 

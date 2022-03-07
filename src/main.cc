@@ -59,6 +59,8 @@ int main(int argc, char **argv)
 
   scenario.Run();
 
+  // Handle topics.
+
   // 1. Load a scenario file.
   //     a. X Load the world.
   //     b. X Place objects.

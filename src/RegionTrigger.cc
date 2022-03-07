@@ -76,7 +76,7 @@ void RegionTrigger::RegionTriggerSystem::PostUpdate(
 //////////////////////////////////////////////////
 bool RegionTrigger::Load(const YAML::Node &_node)
 {
-  auto system = std::make_shared<RegionTrigger::RegionTriggerSystem>();
+  auto sys = std::make_shared<RegionTrigger::RegionTriggerSystem>();
 
   this->SetType(Trigger::TriggerType::REGION);
 
@@ -100,7 +100,7 @@ bool RegionTrigger::Load(const YAML::Node &_node)
     math::Vector3d size = yamlParseVector3d(boxNode["size"]);
     math::Vector3d halfSize = size / 2.0;
 
-    system->box = math::AxisAlignedBox(pos - halfSize, pos + halfSize);
+    sys->box = math::AxisAlignedBox(pos - halfSize, pos + halfSize);
   }
   else
   {
@@ -109,9 +109,12 @@ bool RegionTrigger::Load(const YAML::Node &_node)
     return false;
   }
 
-  igndbg << "Created region trigger " << this->Name() << " with box ["
-    << system->box << "].\n";
+  if (_node["on"])
+    this->LoadOnCommands(_node["on"]);
 
-  this->SetSystem(system);
+  igndbg << "Created region trigger " << this->Name() << " with box ["
+    << sys->box << "].\n";
+
+  this->SetSystem(sys);
   return true;
 }

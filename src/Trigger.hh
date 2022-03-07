@@ -53,6 +53,15 @@ namespace ignition
       /// \param[in] _node The YAML node to load.
       public: virtual bool Load(const YAML::Node &_node);
 
+      /// \brief Load all of the "on:" commands.
+      /// \param[in] _node The YAML node that has the "on:" tag.
+      /// \return True on success.
+      public: bool LoadOnCommands(const YAML::Node &_node);
+
+      /// \brief Run the loaded "on:" commands.
+      /// \return True on success.
+      public: bool RunOnCommands();
+
       /// \brief Get the trigger's Gazebo system.
       /// \return The trigger's system.
       public: std::shared_ptr<gazebo::System> System() const;
@@ -77,9 +86,13 @@ namespace ignition
       /// \param[in] _type The trigger type.
       public: void SetType(const TriggerType &_type);
 
-      /// \brief Private data pointer.
-      IGN_UTILS_IMPL_PTR(dataPtr)
+      private: std::string name{""};
 
+      private: TriggerType type{Trigger::TriggerType::UNDEFINED};
+
+      private: std::shared_ptr<gazebo::System> system;
+
+      private: std::vector<std::string> commands;
     };
     }
   }

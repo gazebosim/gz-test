@@ -19,18 +19,8 @@
 using namespace ignition;
 using namespace test;
 
-class Trigger::Implementation
-{
-  public: std::string name{""};
-
-  public: TriggerType type{Trigger::TriggerType::UNDEFINED};
-
-  public: std::shared_ptr<gazebo::System> system;
-};
-
 /////////////////////////////////////////////////
 Trigger::Trigger()
-  : dataPtr(utils::MakeImpl<Implementation>())
 {
 }
 
@@ -41,37 +31,68 @@ bool Trigger::Load(const YAML::Node &)
 }
 
 //////////////////////////////////////////////////
+bool Trigger::LoadOnCommands(const YAML::Node &_node)
+{
+  if (!_node.IsSequence())
+    return false;
+
+  // Iterate over the sequence of commands.
+  for (YAML::const_iterator it = _node.begin(); it!=_node.end(); ++it)
+  {
+    if ((*it)["run"])
+    {
+      std::string cmd = (*it)["run"].as<std::string>();
+      std::cout << "LoadedCommand[" << cmd << "]\n";
+      this->commands.push_back(cmd);
+    }
+  }
+  return true;
+}
+
+//////////////////////////////////////////////////
+bool Trigger::RunOnCommands()
+{
+  std::cout << "Commands for[" << this->name << "] size[" << this->commands.size() << "]\n";
+  /*for (const std::string &cmd : this->commands)
+  {
+    std::cout << "Running command[" << cmd << "]\n";
+  }*/
+
+  return true;
+}
+
+//////////////////////////////////////////////////
 std::shared_ptr<gazebo::System> Trigger::System() const
 {
-  return this->dataPtr->system;
+  return this->system;
 }
 
 //////////////////////////////////////////////////
 void Trigger::SetSystem(std::shared_ptr<gazebo::System> _system)
 {
-  this->dataPtr->system = _system;
+  this->system = _system;
 }
 
 //////////////////////////////////////////////////
 std::string Trigger::Name() const
 {
-  return this->dataPtr->name;
+  return this->name;
 }
 
 //////////////////////////////////////////////////
 void Trigger::SetName(const std::string &_name)
 {
-  this->dataPtr->name = _name;
+  this->name = _name;
 }
 
 //////////////////////////////////////////////////
 Trigger::TriggerType Trigger::Type() const
 {
-  return this->dataPtr->type;
+  return this->type;
 }
 
 //////////////////////////////////////////////////
 void Trigger::SetType(const TriggerType &_type)
 {
-  this->dataPtr->type = _type;
+  this->type = _type;
 }
