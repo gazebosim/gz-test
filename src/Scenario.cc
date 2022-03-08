@@ -61,7 +61,7 @@ class Scenario::Implementation
   public: std::string description{""};
   public: std::string worldFilename{""};
   public: std::vector<sdf::Model> models;
-  public: std::vector<Test> tests;
+  public: std::vector<std::shared_ptr<Test>> tests;
   public: gazebo::ServerConfig serverConfig;
 
   public: std::string baseLogPath{""};
@@ -190,8 +190,8 @@ bool Scenario::Load(const std::string &_filename)
   for (YAML::const_iterator it = config["tests"].begin();
        it != config["tests"].end(); ++it)
   {
-    Test test;
-    test.Load(*it);
+    std::shared_ptr<Test> test = std::make_shared<Test>();
+    test->Load(*it);
     this->dataPtr->tests.push_back(std::move(test));
   }
 
@@ -228,15 +228,15 @@ bool Scenario::Load(const std::string &_filename)
 void Scenario::Run()
 {
   // Run each test
-  for (Test &test : this->dataPtr->tests)
+  for (std::shared_ptr<Test> test : this->dataPtr->tests)
   {
-    igndbg << "Running Test[" << test.Name() << "]\n";
+    igndbg << "Running Test[" << test->Name() << "]\n";
 
     if (!this->dataPtr->baseLogPath.empty())
     {
       this->dataPtr->serverConfig.SetUseLogRecord(true);
       this->dataPtr->serverConfig.SetLogRecordPath(
-          common::joinPaths(this->dataPtr->baseLogPath, test.Name()));
+          common::joinPaths(this->dataPtr->baseLogPath, test->Name()));
     }
     else
     {
@@ -246,7 +246,8 @@ void Scenario::Run()
     std::unique_ptr<gazebo::Server> server =
       std::make_unique<gazebo::Server>(this->dataPtr->serverConfig);
 
-    test.AddTriggersToServer(*server);
+    server->AddSystem(test);
+    // test.AddTriggersToServer(*server);
 
     server->Run(true, 20000, false);
   }
@@ -301,13 +302,13 @@ void Scenario::SetModels(const std::vector<sdf::Model> &_models)
 }
 
 //////////////////////////////////////////////////
-std::vector<Test> Scenario::Tests() const
+std::vector<std::shared_ptr<Test>> Scenario::Tests() const
 {
   return this->dataPtr->tests;
 }
 
 //////////////////////////////////////////////////
-void Scenario::SetTests(const std::vector<Test> &_tests)
+void Scenario::SetTests(const std::vector<std::shared_ptr<Test>> &_tests)
 {
   this->dataPtr->tests = _tests;
 }

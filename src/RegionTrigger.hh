@@ -37,37 +37,13 @@ namespace ignition
 
       public: virtual bool Load(const YAML::Node &_node) override;
 
-      private: class RegionTriggerSystem :
-            public gazebo::System,
-            public gazebo::ISystemConfigure,
-            public gazebo::ISystemPreUpdate,
-            public gazebo::ISystemUpdate,
-            public gazebo::ISystemPostUpdate
+      // Documentation inherited
+      public: void Update(const gazebo::UpdateInfo &_info,
+                  const gazebo::EntityComponentManager &_ecm) override;
 
-      {
-        // Configure callback
-        public: void Configure(const gazebo::Entity &_entity,
-                               const std::shared_ptr<const sdf::Element> &_sdf,
-                               gazebo::EntityComponentManager &_ecm,
-                               gazebo::EventManager &_eventMgr) override;
+      public: bool triggered{false};
 
-        // Pre update update callback
-        public: void PreUpdate(const gazebo::UpdateInfo &_info,
-                    gazebo::EntityComponentManager &_ecm) override;
-
-        // Documentation inherited
-        public: void Update(const gazebo::UpdateInfo &_info,
-                      gazebo::EntityComponentManager &_ecm) override;
-
-        // Post update callback
-        public: void PostUpdate(const gazebo::UpdateInfo &_info,
-                    const gazebo::EntityComponentManager &_ecm) override;
-
-        public: bool triggered{false};
-
-        public: gazebo::World world;
-        public: math::AxisAlignedBox box;
-      };
+      public: math::AxisAlignedBox box;
     };
     }
   }

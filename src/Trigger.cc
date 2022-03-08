@@ -14,6 +14,21 @@
  * limitations under the License.
  *
 */
+#ifndef _WIN32
+  #include <semaphore.h>
+  #include <sys/stat.h>
+  #include <sys/wait.h>
+  #include <unistd.h>
+#else
+  #include <process.h>
+  /* Needed for std::min */
+  #ifndef NOMINMAX
+    #define NOMINMAX
+  #endif
+  #include <windows.h>
+  #include <Processthreadsapi.h>
+#endif
+
 #include "Trigger.hh"
 
 using namespace ignition;
@@ -42,7 +57,6 @@ bool Trigger::LoadOnCommands(const YAML::Node &_node)
     if ((*it)["run"])
     {
       std::string cmd = (*it)["run"].as<std::string>();
-      std::cout << "LoadedCommand[" << cmd << "]\n";
       this->commands.push_back(cmd);
     }
   }
@@ -52,25 +66,12 @@ bool Trigger::LoadOnCommands(const YAML::Node &_node)
 //////////////////////////////////////////////////
 bool Trigger::RunOnCommands()
 {
-  std::cout << "Commands for[" << this->name << "] size[" << this->commands.size() << "]\n";
-  /*for (const std::string &cmd : this->commands)
+  for (const std::string &cmd : this->commands)
   {
     std::cout << "Running command[" << cmd << "]\n";
-  }*/
+  }
 
   return true;
-}
-
-//////////////////////////////////////////////////
-std::shared_ptr<gazebo::System> Trigger::System() const
-{
-  return this->system;
-}
-
-//////////////////////////////////////////////////
-void Trigger::SetSystem(std::shared_ptr<gazebo::System> _system)
-{
-  this->system = _system;
 }
 
 //////////////////////////////////////////////////
@@ -95,4 +96,142 @@ Trigger::TriggerType Trigger::Type() const
 void Trigger::SetType(const TriggerType &_type)
 {
   this->type = _type;
+}
+
+/////////////////////////////////////////////////
+bool Trigger::RunExecutable(const std::vector<std::string> &_cmd)
+{
+  // Check for empty
+  if (_cmd.empty())
+  {
+    ignerr << "Empty command.\n";
+    return false;
+  }
+
+#ifdef _WIN32
+  typedef struct MyData {
+      std::vector<std::string> _cmd;
+      HANDLE stoppedChildSem;
+  } MYDATA, *PMYDATA;
+
+
+  PMYDATA pDataArray = (PMYDATA) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
+                sizeof(MYDATA));
+  if (pDataArray == nullptr)
+  {
+    ignerr << "allocation fails " << GetLastErrorAsString() << '\n';
+    return false;
+  }
+
+  for (auto & cmd : _cmd){
+    pDataArray->_cmd.push_back(cmd);
+  }
+
+  pDataArray->stoppedChildSem = this->stoppedChildSem;
+
+  auto dontThreadOnMe = [](LPVOID lpParam) -> DWORD {
+    PMYDATA pDataArray;
+    pDataArray = (PMYDATA)lpParam;
+
+    // Create a vector of char* in the child process
+    std::vector<char*> cstrings;
+    cstrings.push_back("C:\\WINDOWS\\SYSTEM32\\CMD.EXE");
+    cstrings.push_back("cmd.exe ");
+    cstrings.push_back("/c");
+    for (const std::string &part : pDataArray->_cmd)
+    {
+      cstrings.push_back(const_cast<char *>(part.c_str()));
+    }
+
+    // Add the nullptr termination.
+    cstrings.push_back(nullptr);
+
+    // Run the command, replacing the current process image
+    if (_spawnv(_P_WAIT , cstrings[0], &cstrings[0]) < 0)
+    {
+      ignerr << "Unable to run command["
+        << std::accumulate(
+            pDataArray->_cmd.begin(),
+            pDataArray->_cmd.end(),
+            std::string(""))
+        << "] " << GetLastErrorAsString() << "\n";
+      return -1;
+    }
+
+    if (!ReleaseSemaphore(pDataArray->stoppedChildSem, 1, nullptr))
+    {
+      ignerr << "Error Releasing Semaphore "
+             << GetLastErrorAsString() << std::endl;
+    }
+
+    if(pDataArray != NULL)
+    {
+      HeapFree(GetProcessHeap(), 0, pDataArray);
+      pDataArray = NULL;    // Ensure address is not reused.
+    }
+
+    return 0;
+  };
+
+  auto thread = CreateThread(
+    nullptr, 0, dontThreadOnMe, pDataArray, 0, nullptr);
+
+  if (thread == nullptr) {
+    ignerr << "Error creating thread on Windows "
+           << GetLastErrorAsString() << '\n';
+  }
+  else
+  {
+    // std::lock_guard<std::mutex> mutex(this->executablesMutex);
+
+    // Store the PID in the parent process.
+    // this->executables.push_back(Executable(thread, _cmd));
+  }
+#else
+  // Fork a process for the command
+  pid_t pid = fork();
+
+  // If parent process...
+  if (pid)
+  {
+    igndbg << "Forked a process for command["
+      << std::accumulate(_cmd.begin(), _cmd.end(), std::string("")) << "]\n"
+      << std::flush;
+
+    // std::lock_guard<std::mutex> mutex(this->executablesMutex);
+    // Store the PID in the parent process.
+    // this->executables.push_back(Executable(pid, _cmd));
+  }
+  // Else child process...
+  else
+  {
+    // A child is not the master
+    // this->master = false;
+
+    // Create a vector of char* in the child process
+    std::vector<char*> cstrings;
+    for (const std::string &part : _cmd)
+    {
+      cstrings.push_back(const_cast<char *>(part.c_str()));
+    }
+
+    // Add the nullptr termination.
+    cstrings.push_back(nullptr);
+
+    // Remove from foreground process group.
+    setpgid(0, 0);
+
+    // Run the command, replacing the current process image
+    if (execvp(cstrings[0], &cstrings[0]) < 0)
+    {
+      ignerr << "Unable to run command["
+             << std::accumulate(
+                _cmd.begin(),
+                _cmd.end(),
+                std::string("")) << "]\n";
+      return false;
+    }
+  }
+#endif
+  return true;
 }

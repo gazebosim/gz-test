@@ -22,26 +22,8 @@
 using namespace ignition;
 using namespace test;
 
-class Test::Implementation
-{
-  /// \brief Default constructor
-  public: Implementation() = default;
-
-  /// \brief Copy constructor
-  public: Implementation(const Test::Implementation &_impl)
-          : name(_impl.name), triggers(_impl.triggers)
-  {}
-
-  /// \brief The test name
-  public: std::string name;
-
-  /// \brief The list of triggers for the test.
-  public: std::vector<Trigger> triggers;
-};
-
 /////////////////////////////////////////////////
 Test::Test()
-  : dataPtr(utils::MakeImpl<Implementation>())
 {
 }
 
@@ -50,7 +32,7 @@ bool Test::Load(const YAML::Node &_node)
 {
   // The test name
   if (_node["name"])
-    this->dataPtr->name = _node["name"].as<std::string>();
+    this->name = _node["name"].as<std::string>();
 
   // Load all the triggers
   for (YAML::const_iterator it = _node["triggers"].begin();
@@ -59,15 +41,15 @@ bool Test::Load(const YAML::Node &_node)
     std::string triggerType = (*it)["type"].as<std::string>();
     if (triggerType == "time")
     {
-      TimeTrigger trigger;
-      trigger.Load(*it);
-      this->dataPtr->triggers.push_back(std::move(trigger));
+      auto trigger = std::make_unique<TimeTrigger>();
+      trigger->Load(*it);
+      this->triggers.push_back(std::move(trigger));
     }
     else if (triggerType == "region")
     {
-      RegionTrigger trigger;
-      trigger.Load(*it);
-      this->dataPtr->triggers.push_back(std::move(trigger));
+      auto trigger = std::make_unique<RegionTrigger>();
+      trigger->Load(*it);
+      this->triggers.push_back(std::move(trigger));
     }
   }
 
@@ -75,17 +57,40 @@ bool Test::Load(const YAML::Node &_node)
 }
 
 /////////////////////////////////////////////////
-void Test::AddTriggersToServer(gazebo::Server &_server)
-{
-  for (Trigger &trigger : this->dataPtr->triggers)
-  {
-    igndbg << "Added system\n";
-    _server.AddSystem(trigger.System());
-  }
-}
-
-/////////////////////////////////////////////////
 std::string Test::Name() const
 {
-  return this->dataPtr->name;
+  return this->name;
+}
+
+//////////////////////////////////////////////////
+void Test::Configure(
+    const gazebo::Entity &_entity,
+    const std::shared_ptr<const sdf::Element> &,
+    gazebo::EntityComponentManager &,
+    gazebo::EventManager &)
+{
+  this->world = gazebo::World(_entity);
+}
+
+//////////////////////////////////////////////////
+void Test::PreUpdate(const gazebo::UpdateInfo &,
+    gazebo::EntityComponentManager &)
+{
+}
+
+//////////////////////////////////////////////////
+void Test::Update(const gazebo::UpdateInfo &,
+    gazebo::EntityComponentManager &)
+{
+}
+
+//////////////////////////////////////////////////
+void Test::PostUpdate(
+    const gazebo::UpdateInfo &_info,
+    const gazebo::EntityComponentManager &_ecm)
+{
+  for (std::unique_ptr<Trigger> &trigger : this->triggers)
+  {
+    trigger->Update(_info, _ecm);
+  }
 }

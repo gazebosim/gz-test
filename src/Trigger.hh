@@ -18,6 +18,9 @@
 #define IGNITION_TEST_TRIGGER_HH_
 
 #include <yaml-cpp/yaml.h>
+#include <string>
+#include <vector>
+
 #include <ignition/gazebo/Server.hh>
 #include <ignition/gazebo/ServerConfig.hh>
 
@@ -53,6 +56,9 @@ namespace ignition
       /// \param[in] _node The YAML node to load.
       public: virtual bool Load(const YAML::Node &_node);
 
+      public: virtual void Update(const gazebo::UpdateInfo &_info,
+                      const gazebo::EntityComponentManager &_ecm) = 0;
+
       /// \brief Load all of the "on:" commands.
       /// \param[in] _node The YAML node that has the "on:" tag.
       /// \return True on success.
@@ -62,13 +68,7 @@ namespace ignition
       /// \return True on success.
       public: bool RunOnCommands();
 
-      /// \brief Get the trigger's Gazebo system.
-      /// \return The trigger's system.
-      public: std::shared_ptr<gazebo::System> System() const;
-
-      /// \brief Set the system.
-      /// \param[in] _system The trigger's Gazebo system.
-      public: void SetSystem(std::shared_ptr<gazebo::System> _system);
+      public: bool RunExecutable(const std::vector<std::string> &_cmd);
 
       /// \brief Get the trigger name.
       /// \return The trigger's name.
@@ -90,7 +90,7 @@ namespace ignition
 
       private: TriggerType type{Trigger::TriggerType::UNDEFINED};
 
-      private: std::shared_ptr<gazebo::System> system;
+      // private: std::shared_ptr<gazebo::System> system;
 
       private: std::vector<std::string> commands;
     };

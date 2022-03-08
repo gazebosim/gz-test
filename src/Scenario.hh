@@ -76,11 +76,11 @@ namespace ignition
 
       /// \brief Get the tests to run.
       /// \return The tests to run.
-      public: std::vector<Test> Tests() const;
+      public: std::vector<std::shared_ptr<Test>> Tests() const;
 
       /// \brief Set the tests to run.
       /// \param[in] _tests The tests to run.
-      public: void SetTests(const std::vector<Test> &_tests);
+      public: void SetTests(const std::vector<std::shared_ptr<Test>> &_tests);
 
       /// \brief Get the server config.
       /// \return The server configuration.

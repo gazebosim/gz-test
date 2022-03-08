@@ -26,58 +26,16 @@
 using namespace ignition;
 using namespace test;
 
-//////////////////////////////////////////////////
-void RegionTrigger::RegionTriggerSystem::Configure(
-    const gazebo::Entity &_entity,
-    const std::shared_ptr<const sdf::Element> &,
-    gazebo::EntityComponentManager &,
-    gazebo::EventManager &)
-{
-  this->world = gazebo::World(_entity);
-}
 
 //////////////////////////////////////////////////
-void RegionTrigger::RegionTriggerSystem::PreUpdate(const gazebo::UpdateInfo &,
-    gazebo::EntityComponentManager &)
+void RegionTrigger::Update(const gazebo::UpdateInfo &,
+    const gazebo::EntityComponentManager &)
 {
-}
-
-//////////////////////////////////////////////////
-void RegionTrigger::RegionTriggerSystem::Update(const gazebo::UpdateInfo &,
-    gazebo::EntityComponentManager &)
-{
-}
-
-//////////////////////////////////////////////////
-void RegionTrigger::RegionTriggerSystem::PostUpdate(
-    const gazebo::UpdateInfo & /*_info*/,
-    const gazebo::EntityComponentManager &/*_ecm*/)
-{
-  /*if (_info.simRegion >= this->duration && !this->triggered)
-  {
-    igndbg << "Region trigger at time[" << _info.simRegion.count() << "]\n";
-
-    //std::string name = "x1-b";
-    //if (this->world.ModelByName(_ecm, name))
-    //{
-    //  gazebo::Model model(this->world.ModelByName(_ecm, name));
-    //  auto pose = _ecm.ComponentData<gazebo::components::Pose>(model.Entity());
-    //  if (pose)
-    //  {
-    //  std::cout << "Model Name[" << model.Name(_ecm) << "] pose[" << *pose << "]\n";
-    //  }
-    //}
-
-    this->triggered = true;
-  }
-  */
 }
 
 //////////////////////////////////////////////////
 bool RegionTrigger::Load(const YAML::Node &_node)
 {
-  auto sys = std::make_shared<RegionTrigger::RegionTriggerSystem>();
-
   this->SetType(Trigger::TriggerType::REGION);
 
   if (_node["name"])
@@ -100,7 +58,7 @@ bool RegionTrigger::Load(const YAML::Node &_node)
     math::Vector3d size = yamlParseVector3d(boxNode["size"]);
     math::Vector3d halfSize = size / 2.0;
 
-    sys->box = math::AxisAlignedBox(pos - halfSize, pos + halfSize);
+    this->box = math::AxisAlignedBox(pos - halfSize, pos + halfSize);
   }
   else
   {
@@ -113,8 +71,7 @@ bool RegionTrigger::Load(const YAML::Node &_node)
     this->LoadOnCommands(_node["on"]);
 
   igndbg << "Created region trigger " << this->Name() << " with box ["
-    << sys->box << "].\n";
+    << this->box << "].\n";
 
-  this->SetSystem(sys);
   return true;
 }

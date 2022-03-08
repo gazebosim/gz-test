@@ -30,9 +30,7 @@ namespace ignition
   {
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_TEST_VERSION_NAMESPACE {
-    class TimeTrigger :
-      public Trigger,
-      public std::enable_shared_from_this<TimeTrigger>
+    class TimeTrigger : public Trigger
     {
       public: enum class Type
       {
@@ -47,40 +45,15 @@ namespace ignition
 
       public: virtual bool Load(const YAML::Node &_node) override;
 
-      private: class TimeTriggerSystem :
-            public gazebo::System,
-            public gazebo::ISystemConfigure,
-            public gazebo::ISystemPreUpdate,
-            public gazebo::ISystemUpdate,
-            public gazebo::ISystemPostUpdate
+      // Documentation inherited
+      public: void Update(const gazebo::UpdateInfo &_info,
+                      const gazebo::EntityComponentManager &_ecm) override;
 
-      {
-        // Configure callback
-        public: void Configure(const gazebo::Entity &_entity,
-                               const std::shared_ptr<const sdf::Element> &_sdf,
-                               gazebo::EntityComponentManager &_ecm,
-                               gazebo::EventManager &_eventMgr) override;
+      public: std::chrono::steady_clock::duration duration;
 
-        // Pre update update callback
-        public: void PreUpdate(const gazebo::UpdateInfo &_info,
-                    gazebo::EntityComponentManager &_ecm) override;
+      public: bool triggered{false};
 
-        // Documentation inherited
-        public: void Update(const gazebo::UpdateInfo &_info,
-                      gazebo::EntityComponentManager &_ecm) override;
-
-        // Post update callback
-        public: void PostUpdate(const gazebo::UpdateInfo &_info,
-                    const gazebo::EntityComponentManager &_ecm) override;
-
-        public: std::chrono::steady_clock::duration duration;
-
-        public: bool triggered{false};
-
-        public: gazebo::World world;
-
-        public: TimeTrigger::Type type{TimeTrigger::Type::SIM};
-      };
+      public: TimeTrigger::Type type{TimeTrigger::Type::SIM};
     };
     }
   }

@@ -18,11 +18,12 @@
 #define IGNITION_TEST_TEST_HH_
 
 #include <yaml-cpp/yaml.h>
-#include <ignition/utils/ImplPtr.hh>
 
 #include <ignition/gazebo/Server.hh>
 #include <ignition/gazebo/ServerConfig.hh>
+#include <ignition/gazebo/World.hh>
 
+#include "Trigger.hh"
 #include "ignition/test/config.hh"
 
 namespace ignition
@@ -31,24 +32,50 @@ namespace ignition
   {
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_TEST_VERSION_NAMESPACE {
-    class Test
+    class Test :
+            public gazebo::System,
+            public gazebo::ISystemConfigure,
+            public gazebo::ISystemPreUpdate,
+            public gazebo::ISystemUpdate,
+            public gazebo::ISystemPostUpdate
+
     {
       /// \brief Default constructor.
       public: Test();
+
+      // Configure callback
+      public: void Configure(const gazebo::Entity &_entity,
+                             const std::shared_ptr<const sdf::Element> &_sdf,
+                             gazebo::EntityComponentManager &_ecm,
+                             gazebo::EventManager &_eventMgr) override;
+
+      // Pre update update callback
+      public: void PreUpdate(const gazebo::UpdateInfo &_info,
+                  gazebo::EntityComponentManager &_ecm) override;
+
+      // Documentation inherited
+      public: void Update(const gazebo::UpdateInfo &_info,
+                    gazebo::EntityComponentManager &_ecm) override;
+
+      // Post update callback
+      public: void PostUpdate(const gazebo::UpdateInfo &_info,
+                    const gazebo::EntityComponentManager &_ecm) override;
 
       /// \brief Load a test.
       /// \param[in] _node The YAML node containing test information
       /// \return True if the test was loaded successfully.
       public: bool Load(const YAML::Node &_node);
 
-      public: void AddTriggersToServer(gazebo::Server &_server);
-
       /// \brief Get the test's name.
       /// \return The name of the test.
       public: std::string Name() const;
 
-      /// \brief Private data pointer.
-      IGN_UTILS_IMPL_PTR(dataPtr)
+      public: gazebo::World world;
+
+      public: std::string name;
+
+      /// \brief The list of triggers for the test.
+      public: std::vector<std::unique_ptr<Trigger>> triggers;
     };
     }
   }

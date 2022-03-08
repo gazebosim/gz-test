@@ -1,6 +1,4 @@
-#ign_get_libsources_and_unittests(sources gtest_sources)
-
-#ign_create_core_library(SOURCES ${sources} CXX_STANDARD ${c++standard})
+add_subdirectory(msgs)
 
 set (sources
   RegionTrigger.cc
@@ -26,6 +24,9 @@ if (UNIX AND NOT APPLE)
 endif()
 
 add_executable(tester main.cc)
+add_dependencies(${PROJECT_LIBRARY_TARGET_NAME}
+  ignition-test_private_msgs
+)
 target_link_libraries(tester
     ${PROJECT_LIBRARY_TARGET_NAME}
 )
