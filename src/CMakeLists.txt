@@ -38,7 +38,7 @@ if (UNIX AND NOT APPLE)
     PRIVATE stdc++fs)
 endif()
 
-add_executable(tester main.cc)
+add_executable(ign-test main.cc)
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
@@ -46,6 +46,8 @@ target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
 add_dependencies(${PROJECT_LIBRARY_TARGET_NAME}
   ignition-test_private_msgs
 )
-target_link_libraries(tester
+target_link_libraries(ign-test
     ${PROJECT_LIBRARY_TARGET_NAME}
 )
+
+install (TARGETS ign-test DESTINATION ${BIN_INSTALL_DIR})
