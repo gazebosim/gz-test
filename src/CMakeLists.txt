@@ -39,6 +39,10 @@ if (UNIX AND NOT APPLE)
 endif()
 
 add_executable(tester main.cc)
+target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+)
 add_dependencies(${PROJECT_LIBRARY_TARGET_NAME}
   ignition-test_private_msgs
 )
