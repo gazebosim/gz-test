@@ -29,7 +29,7 @@ using namespace test;
 
 //////////////////////////////////////////////////
 void RegionTrigger::Update(const gazebo::UpdateInfo &,
-    const gazebo::EntityComponentManager &)
+    const gazebo::World &, const gazebo::EntityComponentManager &)
 {
 }
 

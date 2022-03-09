@@ -39,7 +39,13 @@ message Test
   /// \brief True if all the triggers passed, false otherwise
   bool pass = 2;
 
-  repeated Trigger triggers = 3;
+  /// \brief Time point, in UTC epoch time, that this test started.
+  google.protobuf.Timestamp start_time = 3;
+
+  /// \brief The time it took to run this test.
+  google.protobuf.Duration duration = 4;
+
+  repeated Trigger triggers = 5;
 }
 
 /// \brief Holds information about a peer in the network.

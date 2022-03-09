@@ -23,6 +23,7 @@
 
 #include <ignition/gazebo/Server.hh>
 #include <ignition/gazebo/ServerConfig.hh>
+#include <ignition/gazebo/World.hh>
 
 #include "ignition/test/config.hh"
 
@@ -57,16 +58,23 @@ namespace ignition
       public: virtual bool Load(const YAML::Node &_node);
 
       public: virtual void Update(const gazebo::UpdateInfo &_info,
-                      const gazebo::EntityComponentManager &_ecm) = 0;
+                  const gazebo::World &_world,
+                  const gazebo::EntityComponentManager &_ecm) = 0;
 
       /// \brief Load all of the "on:" commands.
       /// \param[in] _node The YAML node that has the "on:" tag.
       /// \return True on success.
       public: bool LoadOnCommands(const YAML::Node &_node);
 
+      /// \brief Check the expectationsj
+      /// \return True on success.
+      public: bool CheckExpectations(const gazebo::World &_world,
+                  const gazebo::EntityComponentManager &_ecm);
+
       /// \brief Run the loaded "on:" commands.
       /// \return True on success.
-      public: bool RunOnCommands();
+      public: bool RunOnCommands(const gazebo::World &_world,
+                  const gazebo::EntityComponentManager &_ecm);
 
       public: bool RunExecutable(const std::vector<std::string> &_cmd);
 
@@ -86,13 +94,19 @@ namespace ignition
       /// \param[in] _type The trigger type.
       public: void SetType(const TriggerType &_type);
 
+      public: void SetResult(bool _passed);
+      public: std::optional<bool> Result() const;
+
       private: std::string name{""};
 
       private: TriggerType type{Trigger::TriggerType::UNDEFINED};
 
-      // private: std::shared_ptr<gazebo::System> system;
-
       private: std::vector<std::string> commands;
+      private: std::vector<std::string> expectations;
+
+      /// \brief Optional result, where std::nullopt means that there is no
+      /// result.
+      private: std::optional<bool> result;
     };
     }
   }

@@ -65,6 +65,7 @@ class Scenario::Implementation
   public: gazebo::ServerConfig serverConfig;
 
   public: std::string baseLogPath{""};
+  public: bool recordSimState = true;
 };
 
 /////////////////////////////////////////////////
@@ -146,8 +147,8 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
   if (_config["record"])
   {
     YAML::Node recordNode = _config["record"];
-    if (recordNode["path"])
-      this->baseLogPath = recordNode["path"].as<std::string>();
+    if (recordNode["sim-state"])
+      this->recordSimState = recordNode["sim-state"].as<bool>();
   }
 }
 
@@ -158,8 +159,13 @@ Scenario::Scenario()
 }
 
 /////////////////////////////////////////////////
-bool Scenario::Load(const std::string &_filename)
+bool Scenario::Load(const std::string &_filename,
+    const std::string &_outputPath)
 {
+  this->dataPtr->baseLogPath = _outputPath;
+  if (!common::isDirectory(this->dataPtr->baseLogPath))
+    common::createDirectory(this->dataPtr->baseLogPath);
+
   // Try to parse the scenario file.
   YAML::Node config;
   try
@@ -227,14 +233,24 @@ bool Scenario::Load(const std::string &_filename)
 //////////////////////////////////////////////////
 void Scenario::Run()
 {
+  std::pair<int64_t, int64_t> timePair;
+
+  ignition::test::msgs::TestResults result;
+  result.set_scenario_name(this->Name());
+  result.set_description(this->Description());
+  auto scenarioStartTime = std::chrono::steady_clock::now();
+
   // Run each test
   for (std::shared_ptr<Test> test : this->dataPtr->tests)
   {
+    auto startTime = std::chrono::steady_clock::now();
+
     igndbg << "Running Test[" << test->Name() << "]\n";
 
     if (!this->dataPtr->baseLogPath.empty())
     {
-      this->dataPtr->serverConfig.SetUseLogRecord(true);
+      this->dataPtr->serverConfig.SetUseLogRecord(
+          this->dataPtr->recordSimState);
       this->dataPtr->serverConfig.SetLogRecordPath(
           common::joinPaths(this->dataPtr->baseLogPath, test->Name()));
     }
@@ -247,9 +263,47 @@ void Scenario::Run()
       std::make_unique<gazebo::Server>(this->dataPtr->serverConfig);
 
     server->AddSystem(test);
-    // test.AddTriggersToServer(*server);
 
     server->Run(true, 20000, false);
+    auto endTime = std::chrono::steady_clock::now();
+    auto duration = endTime - startTime;
+
+    test::msgs::Test *testResult = result.add_tests();
+    timePair = math::timePointToSecNsec(startTime);
+    testResult->mutable_start_time()->set_seconds(timePair.first);
+    testResult->mutable_start_time()->set_nanos(timePair.second);
+
+    timePair = math::durationToSecNsec(duration);
+    testResult->mutable_duration()->set_seconds(timePair.first);
+    testResult->mutable_duration()->set_nanos(timePair.second);
+
+    test->FillResults(testResult);
+  }
+
+  auto scenarioEndTime = std::chrono::steady_clock::now();
+  auto scenarioDuration = scenarioEndTime - scenarioStartTime;
+
+  timePair = math::timePointToSecNsec(scenarioStartTime);
+  result.mutable_start_time()->set_seconds(timePair.first);
+  result.mutable_start_time()->set_nanos(timePair.second);
+
+  timePair = math::durationToSecNsec(scenarioDuration);
+  result.mutable_duration()->set_seconds(timePair.first);
+  result.mutable_duration()->set_nanos(timePair.second);
+
+  if (!this->dataPtr->baseLogPath.empty() &&
+      common::isDirectory(this->dataPtr->baseLogPath))
+  {
+    std::string resultFilename =
+      common::joinPaths(this->dataPtr->baseLogPath, "result.pbtxt");
+
+    std::ofstream stream;
+    stream.open(resultFilename, std::ofstream::out);
+    stream << result.DebugString() << std::endl;
+  }
+  else
+  {
+    std::cout << result.DebugString() << std::endl;
   }
 }
 

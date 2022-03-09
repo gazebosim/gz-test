@@ -14,15 +14,15 @@ configuration:
   models:
     # Each model has a URI, pose and name.
     - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/X1 UGV"
-      pose: { x: 0.0, y: 0.0, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 0.0 }
+      pose: { x: 0.0, y: 0.0, z: 0.2, roll: 0.0, pitch: 0.0, yaw: 0.0 }
       name: x1-a
     - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/X1 UGV"
-      pose: { x: 0.0, y: 10.0, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 0.0 }
+      pose: { x: 0.0, y: 10.0, z: 0.2, roll: 0.0, pitch: 0.0, yaw: 0.0 }
       name: x1-b
 
   # Simualtion state recording information.
   record:
-    path: /tmp/gazebo
+    sim-state: true
 
 # A list of tests to execute
 tests:
@@ -45,10 +45,10 @@ tests:
         # tripped.
         on:  
           # This expression checks that the x1-a model has not moved.
-          - expect: ${{models.x1-a.pose.x == 0.0}}
+          - expect: ${{model.x1-a.pose.x == 0.0}}
           # The "run" command executes a command. In this case, it sends a 
           # command velocity to the x1-a robot.
-          - run: 'ign topic -t "/model/x1-a/cmd_vel" -m ignition.msgs.Twist -p "linear: {x: 1.0}"'
+          - run: 'ign topic -t /model/x1-a/cmd_vel -m ignition.msgs.Twist -p linear:{x:1.0}'
 
       # This is a "region" trigger, which requires a box region.
       - name: region-trigger-1
@@ -57,7 +57,7 @@ tests:
         box: {pos: {x: 10.0, y: 0.0, z: 0.0}, size: {x: 1.0, y: 1.0, z: 1.0}}
         # When an entiy enters the regions the following commands are
         # executed.
-        on-enter:
+        on:
           - expect: ${{region-trigger-1.contains("x1-a")}}
           - expect: ${{!region-trigger-1.contains("x1-b")}}
           - expect: ${{simulation.time == 10s}}

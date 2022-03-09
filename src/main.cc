@@ -38,11 +38,15 @@ int main(int argc, char **argv)
   });
 
   std::string scenarioFilename = "";
+  std::string outputPath = "";
   int verbose = 1;
   app.add_option("-s,--scenario-file",
       scenarioFilename, "Specify the scenario file")
     ->required()
     ->check(CLI::ExistingFile);
+
+  app.add_option("-o,--output-path",
+      outputPath, "Specify the ouput path");
 
   app.add_option("-v,--verbose",
       verbose, "Verbosity level");
@@ -51,7 +55,7 @@ int main(int argc, char **argv)
 
   ignition::common::Console::SetVerbosity(verbose);
   Scenario scenario;
-  if (!scenario.Load(scenarioFilename))
+  if (!scenario.Load(scenarioFilename, outputPath))
   {
     ignerr << "Failed to load the scenario file[" << scenarioFilename << "]\n";
     return -1;

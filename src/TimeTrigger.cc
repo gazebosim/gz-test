@@ -86,11 +86,7 @@ bool TimeTrigger::Load(const YAML::Node &_node)
     return false;
   }
 
-  if (_node["on"])
-  {
-    std::cout << "TimeTrigger load on commands\n";
-    this->LoadOnCommands(_node["on"]);
-  }
+  Trigger::Load(_node);
 
   igndbg << "\n\nCreated time trigger " << this->Name() << " with duration "
     << this->duration.count() << std::endl;
@@ -100,26 +96,12 @@ bool TimeTrigger::Load(const YAML::Node &_node)
 
 //////////////////////////////////////////////////
 void TimeTrigger::Update(const gazebo::UpdateInfo &_info,
-    const gazebo::EntityComponentManager &/*_ecm*/)
+    const gazebo::World &_world,
+    const gazebo::EntityComponentManager &_ecm)
 {
   if (_info.simTime >= this->duration && !this->triggered)
   {
-    igndbg << "Time trigger at time[" << _info.simTime.count() << "]\n";
-    this->RunOnCommands();
-
-    /*std::string name = "x1-b";
-    if (this->world.ModelByName(_ecm, name))
-    {
-      gazebo::Model model(this->world.ModelByName(_ecm, name));
-      auto pose = _ecm.ComponentData<gazebo::components::Pose>(model.Entity());
-      if (pose)
-      {
-      std::cout << "Model Name[" << model.Name(_ecm) << "] pose[" << *pose << "]\n";
-      }
-    }*/
-
+    this->SetResult(this->RunOnCommands(_world, _ecm));
     this->triggered = true;
   }
 }
-
-

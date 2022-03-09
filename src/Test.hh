@@ -23,6 +23,7 @@
 #include <ignition/gazebo/ServerConfig.hh>
 #include <ignition/gazebo/World.hh>
 
+#include "msgs/results.pb.h"
 #include "Trigger.hh"
 #include "ignition/test/config.hh"
 
@@ -69,6 +70,8 @@ namespace ignition
       /// \brief Get the test's name.
       /// \return The name of the test.
       public: std::string Name() const;
+
+      public: void FillResults(ignition::test::msgs::Test *_msg) const;
 
       public: gazebo::World world;
 

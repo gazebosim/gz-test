@@ -91,6 +91,32 @@ void Test::PostUpdate(
 {
   for (std::unique_ptr<Trigger> &trigger : this->triggers)
   {
-    trigger->Update(_info, _ecm);
+    trigger->Update(_info, this->world, _ecm);
   }
+}
+
+//////////////////////////////////////////////////
+void Test::FillResults(ignition::test::msgs::Test *_msg) const
+{
+  _msg->set_name(this->Name());
+
+  bool allPassed = true;
+  for (const std::unique_ptr<Trigger> &trigger : this->triggers)
+  {
+    test::msgs::Trigger *triggerMsg = _msg->add_triggers();
+    triggerMsg->set_name(trigger->Name());
+    std::optional<bool> triggerResult = trigger->Result();
+
+    if (triggerResult)
+    {
+      triggerMsg->set_pass(*triggerResult);
+      allPassed = allPassed && *triggerResult;
+    }
+    else
+    {
+      allPassed = false;
+    }
+  }
+
+  _msg->set_pass(allPassed);
 }

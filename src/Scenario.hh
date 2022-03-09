@@ -37,7 +37,8 @@ namespace ignition
       /// \brief Load a scenario file.
       /// \param[in] _filename The scenario filename
       /// \return True if the file was loaded successfully.
-      public: bool Load(const std::string &_filename);
+      public: bool Load(const std::string &_filename,
+                  const std::string &_outputPath);
 
       /// \brief Execute the loaded scenario.
       public: void Run();

@@ -29,6 +29,9 @@
   #include <Processthreadsapi.h>
 #endif
 
+#include "ignition/gazebo/Entity.hh"
+#include "ignition/gazebo/Model.hh"
+#include "ignition/gazebo/components/Pose.hh"
 #include "Trigger.hh"
 
 using namespace ignition;
@@ -40,10 +43,15 @@ Trigger::Trigger()
 }
 
 //////////////////////////////////////////////////
-bool Trigger::Load(const YAML::Node &)
+bool Trigger::Load(const YAML::Node &_node)
 {
+  // Load the on commands
+  if (_node["on"])
+    this->LoadOnCommands(_node["on"]);
+
   return false;
 }
+
 
 //////////////////////////////////////////////////
 bool Trigger::LoadOnCommands(const YAML::Node &_node)
@@ -59,16 +67,51 @@ bool Trigger::LoadOnCommands(const YAML::Node &_node)
       std::string cmd = (*it)["run"].as<std::string>();
       this->commands.push_back(cmd);
     }
+    else if ((*it)["expect"])
+    {
+      std::string expectation = (*it)["expect"].as<std::string>();
+      this->expectations.push_back(expectation);
+    }
   }
   return true;
 }
 
 //////////////////////////////////////////////////
-bool Trigger::RunOnCommands()
+bool Trigger::CheckExpectations(const gazebo::World &_world,
+    const gazebo::EntityComponentManager &_ecm)
 {
+  for (const std::string &exp : this->expectations)
+  {
+    std::cout << "Run Expectation[" << exp << "]\n";
+    if (exp == "${{model.x1-a.pose.x == 0.0}}")
+    {
+      std::string modelName = "x1-a";
+      if (_world.ModelByName(_ecm, modelName))
+      {
+        gazebo::Model model(_world.ModelByName(_ecm, modelName));
+        auto pose = _ecm.ComponentData<gazebo::components::Pose>(model.Entity());
+        if (pose && !math::equal(pose->Pos().X(), 0.0))
+        {
+          std::cout << "Model Name[" << model.Name(_ecm) << "] pose[" << *pose << "]\n";
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+//////////////////////////////////////////////////
+bool Trigger::RunOnCommands(const gazebo::World &_world,
+    const gazebo::EntityComponentManager &_ecm)
+{
+  if (!this->CheckExpectations(_world, _ecm))
+    return false;
+
   for (const std::string &cmd : this->commands)
   {
-    std::cout << "Running command[" << cmd << "]\n";
+    std::vector<std::string> parts = common::split(cmd, " ");
+    this->RunExecutable(parts);
   }
 
   return true;
@@ -234,4 +277,16 @@ bool Trigger::RunExecutable(const std::vector<std::string> &_cmd)
   }
 #endif
   return true;
+}
+
+//////////////////////////////////////////////////
+void Trigger::SetResult(bool _passed)
+{
+  this->result = _passed;
+}
+
+//////////////////////////////////////////////////
+std::optional<bool> Trigger::Result() const
+{
+  return this->result;
 }
