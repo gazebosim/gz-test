@@ -236,6 +236,7 @@ bool Scenario::Load(const std::string &_filename,
     root.WorldByIndex(0)->AddModel(model);
 
   this->dataPtr->serverConfig.SetSdfRoot(root);
+  this->dataPtr->serverConfig.SetHeadlessRendering(true);
 
   this->dataPtr->statusPub =
     this->dataPtr->node.Advertise<ignition::msgs::StringMsg>("/test/status");
@@ -324,7 +325,6 @@ void Scenario::Run()
     std::cout << result.DebugString() << std::endl;
   }
 
-  this->SendRecordingCompleteMessage();
 }
 
 //////////////////////////////////////////////////

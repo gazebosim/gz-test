@@ -17,6 +17,8 @@
 
 #include <chrono>
 #include <iostream>
+#include <ignition/common/SignalHandler.hh>
+#include <ignition/common/Util.hh>
 #include <ignition/gazebo/Util.hh>
 #include <ignition/gazebo/Server.hh>
 #include <ignition/utils/cli/CLI.hpp>
@@ -28,6 +30,15 @@
 using namespace ignition;
 using namespace test;
 
+std::atomic<bool> kRun = true;
+
+//////////////////////////////////////////////////
+void onSigIntTerm(int)
+{
+  kRun = false;
+}
+
+//////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   CLI::App app{"Test runner"};
@@ -48,12 +59,29 @@ int main(int argc, char **argv)
   app.add_option("-o,--output-path",
       outputPath, "Specify the ouput path");
 
+  bool keepAlive = false;
+  app.add_flag_callback("-k,--keep-alive", [&](){
+      keepAlive = true;
+      });
+
   app.add_option("-v,--verbose",
       verbose, "Verbosity level");
 
   CLI11_PARSE(app, argc, argv);
 
+  // Set verbosity
   ignition::common::Console::SetVerbosity(verbose);
+
+  // Create the signal handler
+  common::SignalHandler sigHandler;
+  if (!sigHandler.Initialized())
+  {
+    ignerr << "signal(2) failed while setting up for SIGINT" << std::endl;
+    return -1;
+  }
+  sigHandler.AddCallback(std::bind(&onSigIntTerm, std::placeholders::_1));
+
+  // Load the scenario file.
   Scenario scenario;
   if (!scenario.Load(scenarioFilename, outputPath))
   {
@@ -61,25 +89,23 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  scenario.Run();
+  // Run the tests
+  if (kRun)
+  {
+    scenario.Run();
 
-  // Handle topics.
+    // If keep alive, send done messages at 1hz
+    if (keepAlive)
+    {
+      while (kRun)
+      {
+        scenario.SendRecordingCompleteMessage();
+        scenario.SendFinishedMessage();
+        IGN_SLEEP_S(1);
+      }
+    }
+  }
 
-  // 1. Load a scenario file.
-  //     a. X Load the world.
-  //     b. X Place objects.
-  //     c. Apply initial forces and joint positions.
-  //     d. Create triggers
-  //         - Time-based
-  //         - Region-based
-  //         - External trigger
-  //         - Physics state such as velocity or force threshold.
-  // 2. Spawn simulation.
-  //    - Support spawning multiple simulation instances simulatanously
-  // 3. Get results, and log simulation state.
-  // 4. Print results.
-  //
-  //
   // On the side:
   //   1. Update documentation.
   //   2. Get bullet working

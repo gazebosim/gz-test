@@ -28,6 +28,7 @@ sudo apt-get install --no-install-recommends -y \
 
 sudo apt-get install --no-install-recommends -y \
   libbenchmark-dev \
-  libbenchmark1
+  libbenchmark1 \
+  libwebsockets-dev
 
 sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
