@@ -50,7 +50,23 @@ set(IGN_FUEL_TOOLS_VER ${ignition-fuel_tools7_VERSION_MAJOR})
 ign_find_package(ignition-gazebo6 REQUIRED)
 set(IGN_GAZEBO_VER ${ignition-gazebo6_VERSION_MAJOR})
 
+#--------------------------------------
+# Find ignition-transport
+ign_find_package(ignition-transport11 REQUIRED)
+set(IGN_TRANSPORT_MAJOR_VER ${ignition-transport11_VERSION_MAJOR})
+
+#--------------------------------------
+# Find ignition-msgs
+ign_find_package(ignition-msgs8 REQUIRED)
+set(IGN_MSGS_MAJOR_VER ${ignition-msgs8_VERSION_MAJOR})
+
+
 find_package(yaml-cpp REQUIRED)
+
+ign_pkg_check_modules(websockets libwebsockets)
+if (NOT websockets_FOUND)
+  ign_build_warning("Unable to find libwebsockets. The websocket_server plugin will not be built.")
+endif()
 
 #============================================================================
 # Configure the build

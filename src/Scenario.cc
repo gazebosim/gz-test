@@ -24,6 +24,9 @@
 #include <ignition/gazebo/Util.hh>
 #include <ignition/gazebo/Server.hh>
 
+#include <ignition/transport/Node.hh>
+
+#include "websocket_server/WebsocketServer.hh"
 #include "Test.hh"
 #include "Util.hh"
 #include "TimeTrigger.hh"
@@ -66,6 +69,13 @@ class Scenario::Implementation
 
   public: std::string baseLogPath{""};
   public: bool recordSimState = true;
+
+  /// \brief Ignition Transport node.
+  public: transport::Node node;
+
+  public: transport::Node::Publisher statusPub;
+
+  public: std::unique_ptr<WebsocketServer> websocketServer;
 };
 
 /////////////////////////////////////////////////
@@ -227,6 +237,12 @@ bool Scenario::Load(const std::string &_filename,
 
   this->dataPtr->serverConfig.SetSdfRoot(root);
 
+  this->dataPtr->statusPub =
+    this->dataPtr->node.Advertise<ignition::msgs::StringMsg>("/test/status");
+
+  this->dataPtr->websocketServer = std::make_unique<WebsocketServer>();
+  this->dataPtr->websocketServer->Load();
+
   return true;
 }
 
@@ -239,6 +255,8 @@ void Scenario::Run()
   result.set_scenario_name(this->Name());
   result.set_description(this->Description());
   auto scenarioStartTime = std::chrono::steady_clock::now();
+
+  this->dataPtr->websocketServer->RunNonBlocking();
 
   // Run each test
   for (std::shared_ptr<Test> test : this->dataPtr->tests)
@@ -305,6 +323,24 @@ void Scenario::Run()
   {
     std::cout << result.DebugString() << std::endl;
   }
+
+  this->SendRecordingCompleteMessage();
+}
+
+//////////////////////////////////////////////////
+void Scenario::SendRecordingCompleteMessage()
+{
+  ignition::msgs::StringMsg completeMsg;
+  completeMsg.set_data("recording_complete");
+  this->dataPtr->statusPub.Publish(completeMsg);
+}
+
+//////////////////////////////////////////////////
+void Scenario::SendFinishedMessage()
+{
+  ignition::msgs::StringMsg completeMsg;
+  completeMsg.set_data("finished");
+  this->dataPtr->statusPub.Publish(completeMsg);
 }
 
 //////////////////////////////////////////////////

@@ -91,6 +91,10 @@ namespace ignition
       /// \param[in] _config The server configuration.
       public: void SetServerConfig(const gazebo::ServerConfig &_config);
 
+      private: void SendRecordingCompleteMessage();
+
+      private: void SendFinishedMessage();
+
       /// \brief Private data pointer.
       IGN_UTILS_IMPL_PTR(dataPtr)
     };
