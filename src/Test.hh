@@ -73,12 +73,22 @@ namespace ignition
 
       public: void FillResults(ignition::test::msgs::Test *_msg) const;
 
-      public: gazebo::World world;
+      /// \brief Check if a trigger with the given name exists.
+      /// \return True if the trigger exists.
+      public: bool HasTrigger(const std::string &_name) const;
 
-      public: std::string name;
+      public: std::optional<bool> RunTriggerFunction(
+                  const std::string &_triggerName,
+                  const std::string &_functionName,
+                  const std::string &_parameter);
+
+      private: gazebo::World world;
+
+      /// \brief Name of the test
+      private: std::string name;
 
       /// \brief The list of triggers for the test.
-      public: std::vector<std::unique_ptr<Trigger>> triggers;
+      private: std::vector<std::unique_ptr<Trigger>> triggers;
     };
     }
   }

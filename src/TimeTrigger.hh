@@ -47,7 +47,7 @@ namespace ignition
 
       // Documentation inherited
       public: void Update(const gazebo::UpdateInfo &_info,
-                  const gazebo::World &_world,
+                  Test *_testInfo,
                   const gazebo::EntityComponentManager &_ecm) override;
 
       public: std::chrono::steady_clock::duration duration;

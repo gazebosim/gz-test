@@ -18,6 +18,7 @@
 #define IGNITION_TEST_TRIGGER_HH_
 
 #include <yaml-cpp/yaml.h>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -33,6 +34,7 @@ namespace ignition
   {
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+    class Test;
 
     /// \brief Base class for all test triggers.
     class Trigger
@@ -57,8 +59,7 @@ namespace ignition
       /// \param[in] _node The YAML node to load.
       public: virtual bool Load(const YAML::Node &_node);
 
-      public: virtual void Update(const gazebo::UpdateInfo &_info,
-                  const gazebo::World &_world,
+      public: virtual void Update(const gazebo::UpdateInfo &_info, Test *_test,
                   const gazebo::EntityComponentManager &_ecm) = 0;
 
       /// \brief Load all of the "on:" commands.
@@ -68,13 +69,13 @@ namespace ignition
 
       /// \brief Check the expectationsj
       /// \return True on success.
-      public: bool CheckExpectations(const gazebo::World &_world,
-                  const gazebo::EntityComponentManager &_ecm);
+      public: bool CheckExpectations(const gazebo::UpdateInfo &_info,
+                  Test *_test, const gazebo::EntityComponentManager &_ecm);
 
       /// \brief Run the loaded "on:" commands.
       /// \return True on success.
-      public: bool RunOnCommands(const gazebo::World &_world,
-                  const gazebo::EntityComponentManager &_ecm);
+      public: bool RunOnCommands(const gazebo::UpdateInfo &_info,
+                  Test *_test, const gazebo::EntityComponentManager &_ecm);
 
       public: bool RunExecutable(const std::vector<std::string> &_cmd);
 
@@ -97,12 +98,35 @@ namespace ignition
       public: void SetResult(bool _passed);
       public: std::optional<bool> Result() const;
 
+      public: std::optional<bool> ParseFunction(Test *_test,
+                  const std::string &_str);
+
+      public: std::optional<bool> RunFunction(const std::string &_name,
+                  const std::string &_param);
+
+      protected: void RegisterFunction(const std::string &_name,
+                     std::function<bool(const std::string &)> &_func);
+
+      private: std::optional<bool> ParseEquation(
+                   const gazebo::UpdateInfo &_info,
+                   const std::string &_str,
+                   const gazebo::EntityComponentManager &_ecm);
+      private: std::optional<double> ParseValue(const std::string &_str,
+                   const gazebo::UpdateInfo &_info,
+                   const gazebo::EntityComponentManager &_ecm);
+
+      private: std::optional<double> ParsePoseProperty(
+                   const math::Pose3d &_pose,
+                   const std::string &_propertyStr);
+
       private: std::string name{""};
 
       private: TriggerType type{Trigger::TriggerType::UNDEFINED};
 
       private: std::vector<std::string> commands;
       private: std::vector<std::string> expectations;
+      private: std::map<std::string, std::function<bool(const std::string &)>>
+               functions;
 
       /// \brief Optional result, where std::nullopt means that there is no
       /// result.

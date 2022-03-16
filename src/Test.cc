@@ -85,13 +85,12 @@ void Test::Update(const gazebo::UpdateInfo &,
 }
 
 //////////////////////////////////////////////////
-void Test::PostUpdate(
-    const gazebo::UpdateInfo &_info,
+void Test::PostUpdate(const gazebo::UpdateInfo &_info,
     const gazebo::EntityComponentManager &_ecm)
 {
   for (std::unique_ptr<Trigger> &trigger : this->triggers)
   {
-    trigger->Update(_info, this->world, _ecm);
+    trigger->Update(_info, this, _ecm);
   }
 }
 
@@ -119,4 +118,31 @@ void Test::FillResults(ignition::test::msgs::Test *_msg) const
   }
 
   _msg->set_pass(allPassed);
+}
+
+//////////////////////////////////////////////////
+bool Test::HasTrigger(const std::string &_name) const
+{
+  for (const std::unique_ptr<Trigger> &trigger : this->triggers)
+  {
+    if (trigger->Name() == _name)
+      return true;
+  }
+  return false;
+}
+
+//////////////////////////////////////////////////
+std::optional<bool> Test::RunTriggerFunction(
+                  const std::string &_triggerName,
+                  const std::string &_functionName,
+                  const std::string &_parameter)
+{
+  for (std::unique_ptr<Trigger> &trigger : this->triggers)
+  {
+    if (trigger->Name() == _triggerName)
+    {
+      return trigger->RunFunction(_functionName, _parameter);
+    }
+  }
+  return std::nullopt;
 }

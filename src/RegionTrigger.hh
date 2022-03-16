@@ -39,12 +39,15 @@ namespace ignition
 
       // Documentation inherited
       public: void Update(const gazebo::UpdateInfo &_info,
-                  const gazebo::World &_world,
+                  Test *_test,
                   const gazebo::EntityComponentManager &_ecm) override;
+
+      public: bool Contains(const std::string &_name);
 
       public: bool triggered{false};
 
       public: math::AxisAlignedBox box;
+      public: std::unordered_set<std::string> containedEntities;
     };
     }
   }

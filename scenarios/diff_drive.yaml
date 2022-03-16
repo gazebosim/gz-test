@@ -45,7 +45,7 @@ tests:
         # tripped.
         on:  
           # This expression checks that the x1-a model has not moved.
-          - expect: ${{model.x1-a.pose.x == 0.0}}
+          - expect: ${{x1-a.pose.x == 0.0}}
           # The "run" command executes a command. In this case, it sends a 
           # command velocity to the x1-a robot.
           - run: 'ign topic -t /model/x1-a/cmd_vel -m ignition.msgs.Twist -p linear:{x:1.0}'
@@ -53,14 +53,17 @@ tests:
       # This is a "region" trigger, which requires a box region.
       - name: region-trigger-1
         type: region
-        # This is the pose and dimensions of the region
-        box: {pos: {x: 10.0, y: 0.0, z: 0.0}, size: {x: 1.0, y: 1.0, z: 1.0}}
+        geometry:
+          # Geometry position in world coordinates
+          pos: {x: 10.0, y: 0.0, z: 0.0}
+          # This is the pose and dimensions of the region
+          box: {size: {x: 1.0, y: 1.0, z: 1.0}}
         # When an entiy enters the regions the following commands are
         # executed.
         on:
-          - expect: ${{region-trigger-1.contains("x1-a")}}
-          - expect: ${{!region-trigger-1.contains("x1-b")}}
-          - expect: ${{simulation.time == 10s}}
+          - expect: ${{region-trigger-1.contains(x1-a)}}
+          - expect: ${{!region-trigger-1.contains(x1-b)}}
+          - expect: ${{simulation.time >= 10.0}}
 
       # Another time trigger checks that the region no longer contains the
       # x1-a robot.
@@ -70,5 +73,5 @@ tests:
           duration: "0 00:00:15.000"
           type: sim
         on:
-          - expect: ${{!region-trigger-1.contains("x1-a")}}
-          - expect: ${{!region-trigger-1.contains("x1-b")}}
+          - expect: ${{!region-trigger-1.contains(x1-a)}}
+          - expect: ${{!region-trigger-1.contains(x1-b)}}

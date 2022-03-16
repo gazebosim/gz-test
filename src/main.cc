@@ -14,7 +14,6 @@
  * limitations under the License.
  *
 */
-
 #include <chrono>
 #include <iostream>
 #include <ignition/common/SignalHandler.hh>
@@ -80,6 +79,34 @@ int main(int argc, char **argv)
     return -1;
   }
   sigHandler.AddCallback(std::bind(&onSigIntTerm, std::placeholders::_1));
+
+  /*std::string expect = "x1-a.pose.x == 0.0";
+  std::regex reg(R"(==)");
+  auto expBegin = std::sregex_iterator(expect.begin(), expect.end(), reg);
+  auto expEnd = std::sregex_iterator();
+  for (std::sregex_iterator it = expBegin; it != expEnd; ++it)
+  {
+    std::smatch match = *it;
+    if (it->str() == "==")
+    {
+      std::string prefix = it->prefix().str();
+      std::string suffix = it->suffix().str();
+
+      double pre = parseValue(prefix);
+      double suf = parseValue(suffix);;
+      std::cout << "Comparing[" << pre << "==" << suf << "]\n";
+
+      if (math::equal(pre, suf))
+        std::cout << "EQUAL\n";
+      else
+        std::cout << "NOT EQUAL\n";
+    }
+
+    //std::cout << match.prefix().str() << match.str() << match.suffix().str() << std::endl;
+  }
+
+  return 0;
+  */
 
   // Load the scenario file.
   Scenario scenario;

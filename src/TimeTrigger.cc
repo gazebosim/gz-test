@@ -96,12 +96,11 @@ bool TimeTrigger::Load(const YAML::Node &_node)
 
 //////////////////////////////////////////////////
 void TimeTrigger::Update(const gazebo::UpdateInfo &_info,
-    const gazebo::World &_world,
-    const gazebo::EntityComponentManager &_ecm)
+    Test *_test, const gazebo::EntityComponentManager &_ecm)
 {
   if (_info.simTime >= this->duration && !this->triggered)
   {
-    this->SetResult(this->RunOnCommands(_world, _ecm));
+    this->SetResult(this->RunOnCommands(_info, _test, _ecm));
     this->triggered = true;
   }
 }
