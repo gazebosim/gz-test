@@ -2,7 +2,7 @@
 
 ./scripts/build_ign.sh ignitionrobotics ign-cmake ign-cmake2
 ./scripts/build_ign.sh ignitionrobotics ign-tools ign-tools1
-./scripts/build_ign.sh ignitionrobotics ign-math is_time_helper
+./scripts/build_ign.sh ignitionrobotics ign-math ign-math6
 ./scripts/build_ign.sh ignitionrobotics ign-utils ign-utils1
 ./scripts/build_ign.sh ignitionrobotics ign-common ign-common4
 ./scripts/build_ign.sh ignitionrobotics ign-msgs ign-msgs8
