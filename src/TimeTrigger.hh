@@ -22,6 +22,7 @@
 #include <ignition/gazebo/World.hh>
 
 #include "ignition/test/config.hh"
+#include "Util.hh"
 #include "Trigger.hh"
 
 namespace ignition
@@ -32,14 +33,6 @@ namespace ignition
     inline namespace IGNITION_TEST_VERSION_NAMESPACE {
     class TimeTrigger : public Trigger
     {
-      public: enum class Type
-      {
-        // Simulation time trigger type
-        SIM,
-        // Real time trigger type
-        REAL
-      };
-
       // Default constructor.
       public: TimeTrigger();
 
@@ -54,7 +47,7 @@ namespace ignition
 
       public: bool triggered{false};
 
-      public: TimeTrigger::Type type{TimeTrigger::Type::SIM};
+      public: TimeType type{TimeType::SIM};
     };
     }
   }

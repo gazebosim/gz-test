@@ -29,8 +29,22 @@ namespace ignition
   {
     // Inline bracket to help doxygen filtering.
     inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+      enum class TimeType
+      {
+        // Simulation time trigger type
+        SIM,
+        // Real time trigger type
+        REAL
+      };
+
       math::Vector3d yamlParseVector3d(const YAML::Node &_node);
       math::Pose3d yamlParsePose3d(const YAML::Node &_node);
+
+      bool runExecutablesAsBash(const std::vector<std::string> &_cmds);
+      bool runExecutableAsBash(const std::string &_cmd);
+      bool runExecutable(const std::string &_cmd);
+      bool runExecutable(const std::vector<std::string> &_cmd);
+
     }
   }
 }

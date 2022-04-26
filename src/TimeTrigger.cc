@@ -68,14 +68,13 @@ bool TimeTrigger::Load(const YAML::Node &_node)
       std::string timeType =
         common::lowercase(timeNode["type"].as<std::string>());
       if (timeType == "sim")
-        this->type = TimeTrigger::Type::SIM;
+        this->type = TimeType::SIM;
       else if (timeType == "real")
-        this->type = TimeTrigger::Type::REAL;
+        this->type = TimeType::REAL;
       else
       {
         ignerr << "Time trigger[" << this->Name()
           << "] is missing a time type, using simulation time.\n";
-        return false;
       }
     }
   }

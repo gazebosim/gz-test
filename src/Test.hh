@@ -25,7 +25,10 @@
 
 #include "msgs/results.pb.h"
 #include "Trigger.hh"
+#include "Util.hh"
 #include "ignition/test/config.hh"
+
+using namespace std::chrono_literals;
 
 namespace ignition
 {
@@ -82,6 +85,18 @@ namespace ignition
                   const std::string &_functionName,
                   const std::string &_parameter);
 
+      /// \brief Stop the test.
+      public: void Stop();
+
+      public: std::chrono::steady_clock::duration MaxDuration();
+
+      /// \brief Get the time type (sim or real) associated with
+      /// MaxDuration.
+      /// \return The time type, sim or real, for max duration.
+      public: TimeType MaxDurationType();
+
+      public: void SetStopCallback(std::function<void()> &_cb);
+
       private: gazebo::World world;
 
       /// \brief Name of the test
@@ -89,6 +104,11 @@ namespace ignition
 
       /// \brief The list of triggers for the test.
       private: std::vector<std::unique_ptr<Trigger>> triggers;
+
+      public: std::chrono::steady_clock::duration maxDuration{60s};
+      public: TimeType maxDurationType{TimeType::SIM};
+
+      public: std::function<void()> stopCb;
     };
     }
   }

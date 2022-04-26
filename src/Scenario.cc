@@ -20,6 +20,7 @@
 #include <sdf/Root.hh>
 #include <sdf/World.hh>
 
+#include <ignition/common/SignalHandler.hh>
 #include <ignition/fuel_tools/Interface.hh>
 #include <ignition/gazebo/Util.hh>
 #include <ignition/gazebo/Server.hh>
@@ -27,21 +28,26 @@
 #include <ignition/transport/Node.hh>
 
 #include "websocket_server/WebsocketServer.hh"
-#include "Test.hh"
-#include "Util.hh"
-#include "TimeTrigger.hh"
+#include "ProcessManager.hh"
 #include "Scenario.hh"
+#include "Test.hh"
+#include "TimeTrigger.hh"
+#include "Util.hh"
 
 using namespace ignition;
 using namespace test;
 
 class Scenario::Implementation
 {
-  public: Implementation() = default;
+  public: Implementation()
+          {
+            this->CreateSigHandler();
+          }
 
   public: Implementation(const Scenario::Implementation &_impl)
           {
             *this = _impl;
+            this->CreateSigHandler();
           }
 
   public: Implementation &operator=(const Implementation &_impl)
@@ -53,12 +59,27 @@ class Scenario::Implementation
             this->tests = _impl.tests;
             this->serverConfig = _impl.serverConfig;
 
+            this->CreateSigHandler();
             return *this;
           }
+  private: void CreateSigHandler()
+           {
+             // Create the signal handler
+             if (!this->sigHandler.Initialized())
+             {
+               ignerr << "signal(2) failed while setting up for SIGINT"
+                 << std::endl;
+             }
+             this->sigHandler.AddCallback(
+                 std::bind(&Implementation::OnSigIntTerm, this,
+                   std::placeholders::_1));
+           }
 
   /// \brief Load the scenario configuration YAML section.
   /// \param[in] _config The YAML node holding the configuration data.
   public: void LoadConfiguration(const YAML::Node &_config);
+
+  public: void OnSigIntTerm(int _sig);
 
   public: std::string name{""};
   public: std::string description{""};
@@ -76,6 +97,13 @@ class Scenario::Implementation
   public: transport::Node::Publisher statusPub;
 
   public: std::unique_ptr<WebsocketServer> websocketServer;
+
+  public: std::vector<std::string> beforeScript;
+  public: ProcessManager processManager;
+
+  public: common::SignalHandler sigHandler;
+  public: std::unique_ptr<gazebo::Server> server;
+  public: bool run{false};
 };
 
 /////////////////////////////////////////////////
@@ -84,6 +112,15 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
   // Get the world file name
   if (_config["world"])
     this->worldFilename = _config["world"].as<std::string>();
+
+  if (_config["before_script"])
+  {
+    for (YAML::const_iterator it = _config["before_script"].begin();
+        it!=_config["before_script"].end(); ++it)
+    {
+      beforeScript.push_back(it->as<std::string>());
+    }
+  }
 
   // Load all the models, if any
   if (_config["models"])
@@ -219,6 +256,13 @@ bool Scenario::Load(const std::string &_filename,
       << this->dataPtr->worldFilename << "]" << std::endl;
     return false;
   }
+  std::cout << "Resolved world file path[" << worldFilePath << "]\n";
+
+  // \todo I shouldn't have to call this function. The gazebo::Server's
+  // constructor calls this function, but it's probably not suitable when
+  // Gazebo is used a library.
+  sdf::setFindCallback(
+      std::bind(fuel_tools::fetchResource, std::placeholders::_1));
 
   sdf::Root root;
   sdf::Errors errors = root.Load(worldFilePath);
@@ -250,6 +294,7 @@ bool Scenario::Load(const std::string &_filename,
 //////////////////////////////////////////////////
 void Scenario::Run()
 {
+  this->dataPtr->run = true;
   std::pair<int64_t, int64_t> timePair;
 
   ignition::test::msgs::TestResults result;
@@ -259,44 +304,75 @@ void Scenario::Run()
 
   this->dataPtr->websocketServer->RunNonBlocking();
 
+  int passCount = 0;
   // Run each test
-  for (std::shared_ptr<Test> test : this->dataPtr->tests)
+  for (std::vector<std::shared_ptr<Test>>::iterator it =
+      this->dataPtr->tests.begin();
+      it != this->dataPtr->tests.end() && this->dataPtr->run; ++it)
   {
     auto startTime = std::chrono::steady_clock::now();
 
-    igndbg << "Running Test[" << test->Name() << "]\n";
+    igndbg << "Running Test[" << (*it)->Name() << "]\n";
 
     if (!this->dataPtr->baseLogPath.empty())
     {
       this->dataPtr->serverConfig.SetUseLogRecord(
           this->dataPtr->recordSimState);
       this->dataPtr->serverConfig.SetLogRecordPath(
-          common::joinPaths(this->dataPtr->baseLogPath, test->Name()));
+          common::joinPaths(this->dataPtr->baseLogPath, (*it)->Name()));
     }
     else
     {
       this->dataPtr->serverConfig.SetUseLogRecord(false);
     }
 
-    std::unique_ptr<gazebo::Server> server =
-      std::make_unique<gazebo::Server>(this->dataPtr->serverConfig);
-
-    server->AddSystem(test);
-
-    server->Run(true, 20000, false);
-    auto endTime = std::chrono::steady_clock::now();
-    auto duration = endTime - startTime;
-
     test::msgs::Test *testResult = result.add_tests();
+    testResult->set_name((*it)->Name());
     timePair = math::timePointToSecNsec(startTime);
     testResult->mutable_start_time()->set_seconds(timePair.first);
     testResult->mutable_start_time()->set_nanos(timePair.second);
 
-    timePair = math::durationToSecNsec(duration);
-    testResult->mutable_duration()->set_seconds(timePair.first);
-    testResult->mutable_duration()->set_nanos(timePair.second);
+    // \todo store the environment so that it can be clear before each test
+    //
+    //
+    // HERE: Setup correct region triggers.  Build and release docker image. Update ci-test repo so that multiple tests are triggered. Capture robot trajectory. Plot robot trajectory in browswer and show changes over time.
 
-    test->FillResults(testResult);
+    bool beforeScriptSuccessful =
+      this->dataPtr->processManager.RunExecutablesAsBash(
+          this->dataPtr->beforeScript);
+
+    if (beforeScriptSuccessful)
+    {
+      this->dataPtr->server =
+        std::make_unique<gazebo::Server>(this->dataPtr->serverConfig);
+
+      this->dataPtr->server->AddSystem((*it));
+
+      // \todo I think a behavior tree, or state machine would serve us
+      // better here.
+      std::function<void()> stopCb = [&]() {
+        this->dataPtr->server->Stop();
+      };
+      (*it)->SetStopCallback(stopCb);
+
+      // \todo Support Running simulation with a simulation or real time limit.
+      if ((*it)->MaxDurationType() == TimeType::REAL)
+        ignerr << "Real-time type not supported for time-limit\n";
+      std::chrono::steady_clock::duration dt = 10ms;
+      uint64_t iterations = (*it)->MaxDuration() / dt;
+
+      this->dataPtr->server->Run(true, iterations, false);
+      auto endTime = std::chrono::steady_clock::now();
+      auto duration = endTime - startTime;
+
+      timePair = math::durationToSecNsec(duration);
+      testResult->mutable_duration()->set_seconds(timePair.first);
+      testResult->mutable_duration()->set_nanos(timePair.second);
+      if (testResult)
+        passCount++;
+
+      (*it)->FillResults(testResult);
+    }
   }
 
   auto scenarioEndTime = std::chrono::steady_clock::now();
@@ -309,6 +385,8 @@ void Scenario::Run()
   timePair = math::durationToSecNsec(scenarioDuration);
   result.mutable_duration()->set_seconds(timePair.first);
   result.mutable_duration()->set_nanos(timePair.second);
+
+  result.set_pass_count(passCount);
 
   if (!this->dataPtr->baseLogPath.empty() &&
       common::isDirectory(this->dataPtr->baseLogPath))
@@ -413,4 +491,20 @@ gazebo::ServerConfig Scenario::ServerConfig() const
 void Scenario::SetServerConfig(const gazebo::ServerConfig &_config)
 {
   this->dataPtr->serverConfig = _config;
+}
+
+//////////////////////////////////////////////////
+void Scenario::Implementation::OnSigIntTerm(int)
+{
+  std::cout << "\n\nScenario ON SIG INT\n\n";
+  this->run = false;
+
+  // Stop the server
+  if (this->server)
+    this->server->Stop();
+
+  // Stop the tests
+  for (std::shared_ptr<Test> &test : this->tests)
+    test->Stop();
+  this->processManager.Stop();
 }

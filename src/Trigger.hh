@@ -27,6 +27,7 @@
 #include <ignition/gazebo/World.hh>
 
 #include "ignition/test/config.hh"
+#include "ProcessManager.hh"
 
 namespace ignition
 {
@@ -77,8 +78,6 @@ namespace ignition
       public: bool RunOnCommands(const gazebo::UpdateInfo &_info,
                   Test *_test, const gazebo::EntityComponentManager &_ecm);
 
-      public: bool RunExecutable(const std::vector<std::string> &_cmd);
-
       /// \brief Get the trigger name.
       /// \return The trigger's name.
       public: std::string Name() const;
@@ -103,6 +102,8 @@ namespace ignition
 
       public: std::optional<bool> RunFunction(const std::string &_name,
                   const std::string &_param);
+
+      public: void Stop();
 
       protected: void RegisterFunction(const std::string &_name,
                      std::function<bool(const std::string &)> &_func);
@@ -131,6 +132,8 @@ namespace ignition
       /// \brief Optional result, where std::nullopt means that there is no
       /// result.
       private: std::optional<bool> result;
+
+      private: ProcessManager processManager;
     };
     }
   }

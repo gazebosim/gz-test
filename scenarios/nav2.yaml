@@ -1,24 +1,25 @@
 # Name of the scenario
-name: diff-drive-scenario
+name: nav2-scenario
 
 # Description of the scenario
-description: "Test suite for differential drive robot"
+description: "AMR demo using ROS2"
 
 # Software configuration
 configuration:
   # SDF world to use. This can be a Fuel URI, an installed SDF file, an 
   # absolute path, or a relative path to an SDF file.
-  world: empty.sdf
-  
+  world: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/worlds/industrial-warehouse"
+  before_script: 
+    - source /opt/ros/galactic/setup.bash
+    - source /home/nkoenig/colcon_ws/install/setup.bash
+    - ros2 launch nav2_rosdevday_2021 test_launch.py
+
   # List of models to place in the world
   models:
     # Each model has a URI, pose and name.
-    - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/X1 UGV"
-      pose: { x: 0.0, y: 0.0, z: 0.2, roll: 0.0, pitch: 0.0, yaw: 0.0 }
-      name: x1-a
-    - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/X1 UGV"
-      pose: { x: 0.0, y: 10.0, z: 0.2, roll: 0.0, pitch: 0.0, yaw: 0.0 }
-      name: x1-b
+    - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/mp_400"
+      pose: { x: 3.45, y: 2.15, z: 0.1, roll: 0.0, pitch: 0.0, yaw: 3.1415 }
+      name: mp_400
 
   # Simualtion state recording information.
   record:
@@ -29,7 +30,7 @@ tests:
   # Each test has a name
   - name: linear-1
     time-limit:
-      duration: "0 00:00:60.000"
+      duration: "0 00:00:20.000"
       type: sim
     # A set of triggers, each with a unique name, define how the test is
     # executed.
@@ -47,12 +48,14 @@ tests:
         # The "on" commands define what should happen when the trigger is
         # tripped.
         on:  
-          # This expression checks that the x1-a model has not moved.
-          - expect: ${{x1-a.pose.x == 0.0}}
-          # The "run" command executes a command. In this case, it sends a 
-          # command velocity to the x1-a robot.
+          # This expression checks that the mp_400 model has not moved.
+          # - expect: ${{mp_400.pose.x == 3.45}}
+          # The "script" command executes a command. In this case, it sends a 
+          # command velocity to the mp_400 robot.
           - script:
-            - ign topic -t /model/x1-a/cmd_vel -m ignition.msgs.Twist -p linear:{x:0.1}
+            - source /opt/ros/galactic/setup.bash
+            - source /home/nkoenig/colcon_ws/install/setup.bash
+            - python3 /home/nkoenig/colcon_ws/src/nav2_rosdevday_2021/nav2_rosdevday_2021/scripts/picking_demo.py
 
       # This is a "region" trigger, which requires a box region.
       - name: region-trigger-1
@@ -65,17 +68,16 @@ tests:
         # When an entiy enters the regions the following commands are
         # executed.
         on:
-          - expect: ${{region-trigger-1.contains(x1-a)}}
-          - expect: ${{!region-trigger-1.contains(x1-b)}}
+          - expect: ${{region-trigger-1.contains(mp_400)}}
+          - expect: ${{!region-trigger-1.contains(mp_400)}}
           - expect: ${{simulation.time >= 10.0}}
 
       # Another time trigger checks that the region no longer contains the
-      # x1-a robot.
+      # mp_400 robot.
       - name: time-trigger-2
         type: time
         time:
           duration: "0 00:00:15.000"
           type: sim
         on:
-          - expect: ${{!region-trigger-1.contains(x1-a)}}
-          - expect: ${{!region-trigger-1.contains(x1-b)}}
+          - expect: ${{!region-trigger-1.contains(mp_400)}}

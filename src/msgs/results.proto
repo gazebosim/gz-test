@@ -62,6 +62,11 @@ message TestResults
   /// \brief The time it took to run all the tests.
   google.protobuf.Duration duration = 4;
 
+  /// \brief Number of tests that passed. The count of tests can be used to
+  /// determine the number of failed tests, if need. For example:
+  /// `int failCount = tests_count() - pass_count()`.
+  int32 pass_count = 5;
+
   /// \brief The set of tests
-  repeated Test tests = 5;
+  repeated Test tests = 7;
 }

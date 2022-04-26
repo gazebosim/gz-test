@@ -34,6 +34,7 @@ std::atomic<bool> kRun = true;
 //////////////////////////////////////////////////
 void onSigIntTerm(int)
 {
+  std::cout << "\n\nON SIG INT\n\n";
   kRun = false;
 }
 

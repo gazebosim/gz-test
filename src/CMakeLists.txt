@@ -16,6 +16,7 @@ if(NOT MSVC)
 endif()
 
 set (sources
+  ProcessManager.cc
   RegionTrigger.cc
   Scenario.cc
   Test.cc
@@ -38,11 +39,14 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   ${YAML_CPP_LIBRARIES}
   PRIVATE
   ${websockets_LIBRARIES}
+  ${BACKWARD_LIBRARIES}
 )
 if (UNIX AND NOT APPLE)
   target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
     PRIVATE stdc++fs)
 endif()
+
+target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PRIVATE ${BACKWARD_DEFINITIONS})
 
 add_executable(ign-test main.cc)
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}

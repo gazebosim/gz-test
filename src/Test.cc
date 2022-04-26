@@ -34,6 +34,45 @@ bool Test::Load(const YAML::Node &_node)
   if (_node["name"])
     this->name = _node["name"].as<std::string>();
 
+  if (_node["time-limit"])
+  {
+    YAML::Node timeNode = _node["time-limit"];
+    if (timeNode["duration"])
+    {
+      this->maxDuration = math::stringToDuration(
+          timeNode["duration"].as<std::string>());
+    }
+    else
+    {
+      ignerr << "Test [" << this->Name()
+        << "] time-limit is missing a duration.\n";
+      return false;
+    }
+
+    if (timeNode["type"])
+    {
+      std::string timeType =
+        common::lowercase(timeNode["type"].as<std::string>());
+      if (timeType == "sim")
+        this->maxDurationType = TimeType::SIM;
+      else if (timeType == "real")
+        this->maxDurationType = TimeType::REAL;
+      else
+      {
+        ignerr << "Test[" << this->Name()
+          << "] time-limit is missing a time type, using simulation time.\n";
+      }
+    }
+  }
+  else
+  {
+    ignerr << "Test[" << this->Name()
+      << "] is missing a time-limit. Using "
+      << this->maxDuration.count() << "s sim time.\n";
+    return false;
+  }
+
+
   // Load all the triggers
   for (YAML::const_iterator it = _node["triggers"].begin();
        it != _node["triggers"].end(); ++it)
@@ -88,9 +127,17 @@ void Test::Update(const gazebo::UpdateInfo &,
 void Test::PostUpdate(const gazebo::UpdateInfo &_info,
     const gazebo::EntityComponentManager &_ecm)
 {
+  bool complete = true;
   for (std::unique_ptr<Trigger> &trigger : this->triggers)
   {
     trigger->Update(_info, this, _ecm);
+    complete = complete && trigger->Result();
+  }
+
+  // If the test is complete, then stop.
+  if (complete)
+  {
+    this->stopCb();
   }
 }
 
@@ -145,4 +192,31 @@ std::optional<bool> Test::RunTriggerFunction(
     }
   }
   return std::nullopt;
+}
+
+//////////////////////////////////////////////////
+void Test::Stop()
+{
+  for (std::unique_ptr<Trigger> &trigger : this->triggers)
+  {
+    trigger->Stop();
+  }
+}
+
+//////////////////////////////////////////////////
+std::chrono::steady_clock::duration Test::MaxDuration()
+{
+  return this->maxDuration;
+}
+
+//////////////////////////////////////////////////
+TimeType Test::MaxDurationType()
+{
+  return this->maxDurationType;
+}
+
+//////////////////////////////////////////////////
+void Test::SetStopCallback(std::function<void()> &_cb)
+{
+  this->stopCb = _cb;
 }
