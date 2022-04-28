@@ -43,6 +43,8 @@ namespace ignition
                   Test *_testInfo,
                   const gazebo::EntityComponentManager &_ecm) override;
 
+      protected: void ResetImpl() override final;
+
       public: std::chrono::steady_clock::duration duration;
 
       public: bool triggered{false};

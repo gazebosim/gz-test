@@ -97,6 +97,9 @@ namespace ignition
       public: void SetResult(bool _passed);
       public: std::optional<bool> Result() const;
 
+      public: void SetTriggered(bool _triggered);
+      public: bool Triggered() const;
+
       public: std::optional<bool> ParseFunction(Test *_test,
                   const std::string &_str);
 
@@ -105,8 +108,13 @@ namespace ignition
 
       public: void Stop();
 
+      /// \brief Reset the trigger. This clears the results.
+      public: void Reset();
+
       protected: void RegisterFunction(const std::string &_name,
                      std::function<bool(const std::string &)> &_func);
+
+      protected: virtual void ResetImpl() = 0;
 
       private: std::optional<bool> ParseEquation(
                    const gazebo::UpdateInfo &_info,
@@ -125,13 +133,21 @@ namespace ignition
       private: TriggerType type{Trigger::TriggerType::UNDEFINED};
 
       private: std::vector<std::string> commands;
-      private: std::vector<std::string> expectations;
+
+      /// \brief The list of expectations. The first element in the
+      /// pair is the expectation, the second is whether or not the
+      /// expectation is an assertion (true if assertion).
+      private: std::vector<std::pair<std::string, bool>> expectations;
+
       private: std::map<std::string, std::function<bool(const std::string &)>>
                functions;
 
       /// \brief Optional result, where std::nullopt means that there is no
       /// result.
       private: std::optional<bool> result;
+
+      /// \brief True if the trigger was triggered.
+      private: bool triggered{false};
 
       private: ProcessManager processManager;
     };

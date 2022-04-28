@@ -45,6 +45,19 @@ namespace ignition
       bool runExecutable(const std::string &_cmd);
       bool runExecutable(const std::vector<std::string> &_cmd);
 
+      inline std::pair<int64_t, int64_t> timePointToSecNsec(
+        const std::chrono::system_clock::time_point &_time)
+      {
+        auto now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            _time.time_since_epoch());
+        auto now_s = std::chrono::duration_cast<std::chrono::seconds>(
+            _time.time_since_epoch());
+        int64_t seconds = now_s.count();
+        int64_t nanoseconds = std::chrono::duration_cast
+          <std::chrono::nanoseconds>(now_ns - now_s).count();
+        return {seconds, nanoseconds};
+      }
+
     }
   }
 }

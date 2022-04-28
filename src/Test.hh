@@ -97,6 +97,9 @@ namespace ignition
 
       public: void SetStopCallback(std::function<void()> &_cb);
 
+      /// \brief Reset the test. This clears the results.
+      public: void Reset();
+
       private: gazebo::World world;
 
       /// \brief Name of the test
@@ -105,7 +108,7 @@ namespace ignition
       /// \brief The list of triggers for the test.
       private: std::vector<std::unique_ptr<Trigger>> triggers;
 
-      public: std::chrono::steady_clock::duration maxDuration{60s};
+      public: std::chrono::steady_clock::duration maxDuration{0s};
       public: TimeType maxDurationType{TimeType::SIM};
 
       public: std::function<void()> stopCb;

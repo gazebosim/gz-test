@@ -28,10 +28,7 @@ configuration:
 # A list of tests to execute
 tests:
   # Each test has a name
-  - name: linear-1
-    time-limit:
-      duration: "0 00:00:20.000"
-      type: sim
+  - name: amr-1
     # A set of triggers, each with a unique name, define how the test is
     # executed.
     triggers:
@@ -62,22 +59,12 @@ tests:
         type: region
         geometry:
           # Geometry position in world coordinates
-          pos: {x: 10.0, y: 0.0, z: 0.0}
+          pos: {x: -3.0, y: 1.0, z: 0.5}
           # This is the pose and dimensions of the region
           box: {size: {x: 1.0, y: 1.0, z: 1.0}}
         # When an entiy enters the regions the following commands are
         # executed.
         on:
           - expect: ${{region-trigger-1.contains(mp_400)}}
-          - expect: ${{!region-trigger-1.contains(mp_400)}}
-          - expect: ${{simulation.time >= 10.0}}
-
-      # Another time trigger checks that the region no longer contains the
-      # mp_400 robot.
-      - name: time-trigger-2
-        type: time
-        time:
-          duration: "0 00:00:15.000"
-          type: sim
-        on:
-          - expect: ${{!region-trigger-1.contains(mp_400)}}
+          - expect: ${{simulation.time > 10.0}}
+          - expect: ${{simulation.time < 60.0}}

@@ -78,8 +78,14 @@ bool Trigger::LoadOnCommands(const YAML::Node &_node)
     else if ((*it)["expect"])
     {
       std::string expectation = (*it)["expect"].as<std::string>();
-      this->expectations.push_back(expectation);
+      this->expectations.push_back({expectation, false});
     }
+    else if ((*it)["assert"])
+    {
+      std::string assertion = (*it)["assert"].as<std::string>();
+      this->expectations.push_back({assertion, true});
+    }
+
   }
   return true;
 }
@@ -89,18 +95,28 @@ bool Trigger::CheckExpectations(const gazebo::UpdateInfo &_info, Test *_test,
     const gazebo::EntityComponentManager &_ecm)
 {
   bool expResult = true;
-  for (std::string exp : this->expectations)
+  for (const std::pair<std::string, bool> &expect : this->expectations)
   {
     // Strip out the beginning "${{" and ending "}}"
-    size_t startIdx = exp.find("${{")+3;
-    size_t endIdx = exp.find("}}");
-    exp = exp.substr(startIdx, endIdx-startIdx);
+    size_t startIdx = expect.first.find("${{")+3;
+    size_t endIdx = expect.first.find("}}");
+    std::string exp = expect.first.substr(startIdx, endIdx-startIdx);
 
     // Attempt to get a result from an expectation that is an equation.
     std::optional<bool> r = this->ParseEquation(_info, exp, _ecm);
     if (r)
     {
       expResult = expResult && *r;
+
+      // Short circuit if assert and result was false
+      if (expect.second && !(*r))
+      {
+        ignerr << "Assertion\n";
+        return expResult;
+      }
+
+      if (!(*r))
+        igndbg << "Expecation[" << exp << "] failed\n";
       continue;
     }
 
@@ -109,6 +125,17 @@ bool Trigger::CheckExpectations(const gazebo::UpdateInfo &_info, Test *_test,
     if (r)
     {
       expResult = expResult && *r;
+
+      // Short circuit if assert and results was false
+      if (expect.second && !(*r))
+      {
+        ignerr << "Assertion\n";
+        return expResult;
+      }
+
+      if (!(*r))
+        igndbg << "Expecation[" << exp << "] failed\n";
+
       continue;
     }
     ignerr << "Invalid expectation[" << exp << "]\n";
@@ -213,7 +240,7 @@ std::optional<bool> Trigger::ParseEquation(const gazebo::UpdateInfo &_info,
     const std::string &_str,
     const gazebo::EntityComponentManager &_ecm)
 {
-  std::regex reg(R"(==|!=|>=|<=)");
+  std::regex reg(R"(==|!=|>=|<=|<|>)");
   auto expBegin = std::sregex_iterator(_str.begin(), _str.end(), reg);
   auto expEnd = std::sregex_iterator();
   for (std::sregex_iterator it = expBegin; it != expEnd; ++it)
@@ -236,6 +263,13 @@ std::optional<bool> Trigger::ParseEquation(const gazebo::UpdateInfo &_info,
         return *preValue >= *sufValue;
       else if (it->str() == "<=")
         return *preValue <= *sufValue;
+      else if (it->str() == ">")
+        return *preValue > *sufValue;
+      else if (it->str() == "<")
+      {
+        std::cout << "Pre[" << *preValue << "] Suf[" << *sufValue << "]\n";
+        return *preValue < *sufValue;
+      }
       else
         ignerr << "Invalid equation operation[" << it->str() << "]\n";
     }
@@ -287,7 +321,7 @@ std::optional<double> Trigger::ParseValue(const std::string &_str,
     else if (parts[0] == "simulation")
     {
       if (parts.size() == 2 && parts[1] == "time")
-        return static_cast<double>(_info.simTime.count());
+        return std::chrono::duration<double>(_info.simTime).count();
     }
   }
   else if (math::isTimeString(str))
@@ -343,4 +377,24 @@ std::optional<bool> Trigger::RunFunction(const std::string &_name,
 void Trigger::Stop()
 {
   this->processManager.Stop();
+}
+
+//////////////////////////////////////////////////
+void Trigger::Reset()
+{
+  this->result = std::nullopt;
+  this->triggered = false;
+  this->ResetImpl();
+}
+
+//////////////////////////////////////////////////
+void Trigger::SetTriggered(bool _triggered)
+{
+  this->triggered = _triggered;
+}
+
+//////////////////////////////////////////////////
+bool Trigger::Triggered() const
+{
+  return this->triggered;
 }

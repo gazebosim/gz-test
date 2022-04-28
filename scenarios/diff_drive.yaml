@@ -24,12 +24,23 @@ configuration:
   record:
     sim-state: true
 
+  # The available parameters and default value
+  parameters:
+    velocity: {type: 'double', default: 1.0}
+    region-time: {type: 'double', default: 10.0}
+
+  # Number of iterations to run each test. 
+  iterations:
+    - {velocity: 0.1}
+    - {velocity: 0.2}
+    - {velocity: 0.3}
+
 # A list of tests to execute
 tests:
   # Each test has a name
   - name: linear-1
     time-limit:
-      duration: "0 00:00:60.000"
+      duration: "0 00:00:20.000"
       type: sim
     # A set of triggers, each with a unique name, define how the test is
     # executed.
@@ -48,11 +59,11 @@ tests:
         # tripped.
         on:  
           # This expression checks that the x1-a model has not moved.
-          - expect: ${{x1-a.pose.x == 0.0}}
+          - assert: ${{x1-a.pose.x == 0.0}}
           # The "run" command executes a command. In this case, it sends a 
           # command velocity to the x1-a robot.
           - script:
-            - ign topic -t /model/x1-a/cmd_vel -m ignition.msgs.Twist -p linear:{x:0.1}
+            - ign topic -t /model/x1-a/cmd_vel -m ignition.msgs.Twist -p linear:{x:${{velocity}}}
 
       # This is a "region" trigger, which requires a box region.
       - name: region-trigger-1

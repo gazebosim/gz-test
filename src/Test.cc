@@ -45,8 +45,8 @@ bool Test::Load(const YAML::Node &_node)
     else
     {
       ignerr << "Test [" << this->Name()
-        << "] time-limit is missing a duration.\n";
-      return false;
+        << "] time-limit is missing a duration. "
+        << "Unlimited duration will be used\n";
     }
 
     if (timeNode["type"])
@@ -66,12 +66,9 @@ bool Test::Load(const YAML::Node &_node)
   }
   else
   {
-    ignerr << "Test[" << this->Name()
-      << "] is missing a time-limit. Using "
-      << this->maxDuration.count() << "s sim time.\n";
-    return false;
+    ignwarn << "Test[" << this->Name()
+      << "] is missing a time-limit. Unlimited sim time will be used.\n";
   }
-
 
   // Load all the triggers
   for (YAML::const_iterator it = _node["triggers"].begin();
@@ -219,4 +216,13 @@ TimeType Test::MaxDurationType()
 void Test::SetStopCallback(std::function<void()> &_cb)
 {
   this->stopCb = _cb;
+}
+
+//////////////////////////////////////////////////
+void Test::Reset()
+{
+  for (std::unique_ptr<Trigger> &trigger : this->triggers)
+  {
+    trigger->Reset();
+  }
 }

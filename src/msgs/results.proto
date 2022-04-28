@@ -48,6 +48,12 @@ message Test
   repeated Trigger triggers = 5;
 }
 
+message Iteration
+{
+  /// \brief The set of tests
+  repeated Test tests = 1;
+}
+
 /// \brief Holds information about a peer in the network.
 message TestResults
 {
@@ -62,11 +68,11 @@ message TestResults
   /// \brief The time it took to run all the tests.
   google.protobuf.Duration duration = 4;
 
-  /// \brief Number of tests that passed. The count of tests can be used to
-  /// determine the number of failed tests, if need. For example:
-  /// `int failCount = tests_count() - pass_count()`.
-  int32 pass_count = 5;
+  /// \brief Total number of tests that were run
+  int32 test_count = 5;
 
-  /// \brief The set of tests
-  repeated Test tests = 7;
+  /// \brief Number of tests that passed.
+  int32 test_pass_count = 6;
+
+  repeated Iteration iterations = 7;
 }

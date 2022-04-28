@@ -254,7 +254,7 @@ function userScript {
   std::string scriptFooter = R"footer(
 }
 # Run the script in the background so that we are able to trap signals.
-userScript &
+userScript >/tmp/stdout.log 2>/tmp/stderr.log &
 wait
 )footer";
 

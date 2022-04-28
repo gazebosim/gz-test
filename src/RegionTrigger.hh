@@ -44,7 +44,7 @@ namespace ignition
 
       public: bool Contains(const std::string &_name);
 
-      public: bool triggered{false};
+      protected: void ResetImpl() override final;
 
       public: math::AxisAlignedBox box;
       public: std::unordered_set<std::string> containedEntities;

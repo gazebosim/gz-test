@@ -115,3 +115,9 @@ bool RegionTrigger::Contains(const std::string &_name)
 {
   return this->containedEntities.find(_name) != this->containedEntities.end();
 }
+
+//////////////////////////////////////////////////
+void RegionTrigger::ResetImpl()
+{
+  this->containedEntities.clear();
+}

@@ -24,6 +24,7 @@
 #include <ignition/fuel_tools/Interface.hh>
 #include <ignition/gazebo/Util.hh>
 #include <ignition/gazebo/Server.hh>
+#include <ignition/math/Stopwatch.hh>
 
 #include <ignition/transport/Node.hh>
 
@@ -104,6 +105,20 @@ class Scenario::Implementation
   public: common::SignalHandler sigHandler;
   public: std::unique_ptr<gazebo::Server> server;
   public: bool run{false};
+
+  public: class Param
+          {
+            public: std::string name;
+            public: std::string type;
+            public: std::string value;
+          };
+
+  public: typedef std::map<std::string, Param> ParameterMap;
+  public: ParameterMap parameters;
+  public: std::vector<ParameterMap> iterations;
+  public: size_t iteration{0};
+
+  public: std::vector<std::string> testYaml;
 };
 
 /////////////////////////////////////////////////
@@ -141,7 +156,7 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
         sdf::Errors errors = root.Load(modelSdfFile);
 
         for (sdf::Error &err : errors)
-          std::cout << err.Message() << std::endl;
+          ignerr << err.Message() << std::endl;
 
         model = *(root.Model());
         model.SetUri(uri);
@@ -154,7 +169,9 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
 
       // Get the model's name
       if ((*it)["name"])
+      {
         model.SetName((*it)["name"].as<std::string>());
+      }
       else
       {
         ignerr << "model missing name, skipping\n";
@@ -163,28 +180,7 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
 
       // Get the model's pose
       if ((*it)["pose"])
-      {
-        /*math::Pose3d pose;
-        if ((*it)["pose"]["x"])
-          pose.SetX((*it)["pose"]["x"].as<double>());
-        if ((*it)["pose"]["y"])
-          pose.SetY((*it)["pose"]["y"].as<double>());
-        if ((*it)["pose"]["z"])
-          pose.SetZ((*it)["pose"]["z"].as<double>());
-
-        math::Vector3d rot = pose.Rot().Euler();
-
-        if ((*it)["pose"]["roll"])
-          rot.X((*it)["pose"]["roll"].as<double>());
-        if ((*it)["pose"]["pitch"])
-          rot.Y((*it)["pose"]["pitch"].as<double>());
-        if ((*it)["pose"]["yaw"])
-          rot.Z((*it)["pose"]["yaw"].as<double>());
-
-        pose.Rot().Euler(rot);
-          */
         model.SetRawPose(yamlParsePose3d((*it)["pose"]));
-      }
 
       this->models.push_back(model);
     }
@@ -196,6 +192,46 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
     YAML::Node recordNode = _config["record"];
     if (recordNode["sim-state"])
       this->recordSimState = recordNode["sim-state"].as<bool>();
+  }
+
+  if (_config["parameters"])
+  {
+    for (YAML::const_iterator it = _config["parameters"].begin();
+         it != _config["parameters"].end(); ++it)
+    {
+      Implementation::Param param;
+
+      param.name = it->first.as<std::string>();
+      param.type = it->second["type"].as<std::string>();
+      param.value = it->second["default"].as<std::string>();
+
+      this->parameters[param.name] = param;
+    }
+  }
+
+  if (_config["iterations"])
+  {
+    for (YAML::const_iterator it = _config["iterations"].begin();
+         it != _config["iterations"].end(); ++it)
+    {
+      ParameterMap iterationParameters;
+      for (YAML::const_iterator mapIt = it->begin();
+           mapIt != it->end(); ++mapIt)
+      {
+        Implementation::Param param;
+        param.name = mapIt->first.as<std::string>();
+        param.value = mapIt->second.as<std::string>();
+
+        iterationParameters[param.name] = param;
+      }
+
+      this->iterations.push_back(iterationParameters);
+    }
+  }
+  else
+  {
+    // Add an empty iteration.
+    this->iterations.push_back({});
   }
 }
 
@@ -239,13 +275,13 @@ bool Scenario::Load(const std::string &_filename,
   if (config["configuration"])
     this->dataPtr->LoadConfiguration(config["configuration"]);
 
-  // Load all the tests
+  // Load the yaml strings for all the tests
   for (YAML::const_iterator it = config["tests"].begin();
        it != config["tests"].end(); ++it)
   {
-    std::shared_ptr<Test> test = std::make_shared<Test>();
-    test->Load(*it);
-    this->dataPtr->tests.push_back(std::move(test));
+    std::ostringstream stream;
+    stream << *it;
+    this->dataPtr->testYaml.push_back(stream.str());
   }
 
   std::string worldFilePath = gazebo::resolveSdfWorldFile(
@@ -256,7 +292,7 @@ bool Scenario::Load(const std::string &_filename,
       << this->dataPtr->worldFilename << "]" << std::endl;
     return false;
   }
-  std::cout << "Resolved world file path[" << worldFilePath << "]\n";
+  igndbg << "Resolved world file path[" << worldFilePath << "]\n";
 
   // \todo I shouldn't have to call this function. The gazebo::Server's
   // constructor calls this function, but it's probably not suitable when
@@ -300,93 +336,136 @@ void Scenario::Run()
   ignition::test::msgs::TestResults result;
   result.set_scenario_name(this->Name());
   result.set_description(this->Description());
-  auto scenarioStartTime = std::chrono::steady_clock::now();
+
+  // Start a stop watch to record the duration of the run.
+  math::Stopwatch watch;
+  watch.Start();
+
+  // Record the system start time
+  timePair = timePointToSecNsec(std::chrono::system_clock::now());
+  result.mutable_start_time()->set_seconds(timePair.first);
+  result.mutable_start_time()->set_nanos(timePair.second);
 
   this->dataPtr->websocketServer->RunNonBlocking();
 
   int passCount = 0;
-  // Run each test
-  for (std::vector<std::shared_ptr<Test>>::iterator it =
-      this->dataPtr->tests.begin();
-      it != this->dataPtr->tests.end() && this->dataPtr->run; ++it)
+  int totalCount = 0;
+  math::Stopwatch testWatch;
+  // Run each iteration
+  for (this->dataPtr->iteration= 0;
+       this->dataPtr->iteration < this->dataPtr->iterations.size();
+       ++this->dataPtr->iteration)
   {
-    auto startTime = std::chrono::steady_clock::now();
+    igndbg << "Running test iteration " << this->dataPtr->iteration << "\n";
 
-    igndbg << "Running Test[" << (*it)->Name() << "]\n";
+    test::msgs::Iteration *iterationResult = result.add_iterations();
 
-    if (!this->dataPtr->baseLogPath.empty())
+    // Create the tests.
+    this->dataPtr->tests.clear();
+    for (std::string yamlStr : this->dataPtr->testYaml)
     {
-      this->dataPtr->serverConfig.SetUseLogRecord(
-          this->dataPtr->recordSimState);
-      this->dataPtr->serverConfig.SetLogRecordPath(
-          common::joinPaths(this->dataPtr->baseLogPath, (*it)->Name()));
+      for (const std::pair<std::string, Implementation::Param> &param :
+          this->dataPtr->iterations[this->dataPtr->iteration])
+      {
+        yamlStr = std::regex_replace(yamlStr,
+            std::regex("\\$\\{\\{" + param.first +"\\}\\}"),
+            param.second.value);
+      }
+
+      YAML::Node parsedNode = YAML::Load(yamlStr);
+
+      std::shared_ptr<Test> test = std::make_shared<Test>();
+      test->Load(parsedNode);
+      this->dataPtr->tests.push_back(std::move(test));
     }
-    else
+
+    // Run each test
+    for (std::vector<std::shared_ptr<Test>>::iterator it =
+        this->dataPtr->tests.begin();
+        it != this->dataPtr->tests.end() && this->dataPtr->run; ++it)
     {
-      this->dataPtr->serverConfig.SetUseLogRecord(false);
-    }
+      testWatch.Start(true);
 
-    test::msgs::Test *testResult = result.add_tests();
-    testResult->set_name((*it)->Name());
-    timePair = math::timePointToSecNsec(startTime);
-    testResult->mutable_start_time()->set_seconds(timePair.first);
-    testResult->mutable_start_time()->set_nanos(timePair.second);
+      igndbg << "Running Test[" << (*it)->Name() << "]\n";
 
-    // \todo store the environment so that it can be clear before each test
-    //
-    //
-    // HERE: Setup correct region triggers.  Build and release docker image. Update ci-test repo so that multiple tests are triggered. Capture robot trajectory. Plot robot trajectory in browswer and show changes over time.
+      if (!this->dataPtr->baseLogPath.empty())
+      {
+        this->dataPtr->serverConfig.SetUseLogRecord(
+            this->dataPtr->recordSimState);
+        this->dataPtr->serverConfig.SetLogRecordPath(
+            common::joinPaths(this->dataPtr->baseLogPath, (*it)->Name(),
+              std::to_string(this->dataPtr->iteration)));
+      }
+      else
+      {
+        this->dataPtr->serverConfig.SetUseLogRecord(false);
+      }
 
-    bool beforeScriptSuccessful =
-      this->dataPtr->processManager.RunExecutablesAsBash(
-          this->dataPtr->beforeScript);
+      test::msgs::Test *testResult = iterationResult->add_tests();
+      testResult->set_name((*it)->Name());
+      timePair = timePointToSecNsec(std::chrono::system_clock::now());
+      testResult->mutable_start_time()->set_seconds(timePair.first);
+      testResult->mutable_start_time()->set_nanos(timePair.second);
 
-    if (beforeScriptSuccessful)
-    {
-      this->dataPtr->server =
-        std::make_unique<gazebo::Server>(this->dataPtr->serverConfig);
+      // HERE: Setup a correct region trigger.
+      //       Capture console logs
+      //       A trigger can trigger anohter trigger.
+      //       Build and release docker image.
+      //       Update ci-test repo so that multiple tests are triggered.
+      //       Capture robot trajectory.
+      //       Plot robot trajectory in browswer and show changes over time.
 
-      this->dataPtr->server->AddSystem((*it));
+      bool beforeScriptSuccessful =
+        this->dataPtr->processManager.RunExecutablesAsBash(
+            this->dataPtr->beforeScript);
 
-      // \todo I think a behavior tree, or state machine would serve us
-      // better here.
-      std::function<void()> stopCb = [&]() {
-        this->dataPtr->server->Stop();
-      };
-      (*it)->SetStopCallback(stopCb);
+      if (beforeScriptSuccessful)
+      {
+        this->dataPtr->server =
+          std::make_unique<gazebo::Server>(this->dataPtr->serverConfig);
 
-      // \todo Support Running simulation with a simulation or real time limit.
-      if ((*it)->MaxDurationType() == TimeType::REAL)
-        ignerr << "Real-time type not supported for time-limit\n";
-      std::chrono::steady_clock::duration dt = 10ms;
-      uint64_t iterations = (*it)->MaxDuration() / dt;
+        this->dataPtr->server->AddSystem((*it));
 
-      this->dataPtr->server->Run(true, iterations, false);
-      auto endTime = std::chrono::steady_clock::now();
-      auto duration = endTime - startTime;
+        // \todo I think a behavior tree, or state machine would serve us
+        // better here.
+        std::function<void()> stopCb = [&]() {
+          this->dataPtr->server->Stop();
+        };
+        (*it)->SetStopCallback(stopCb);
 
-      timePair = math::durationToSecNsec(duration);
-      testResult->mutable_duration()->set_seconds(timePair.first);
-      testResult->mutable_duration()->set_nanos(timePair.second);
-      if (testResult)
-        passCount++;
+        // \todo Support Running simulation with a simulation or
+        // real time limit.
+        if ((*it)->MaxDurationType() == TimeType::REAL)
+          ignerr << "Real-time type not supported for time-limit\n";
+        uint64_t iterations = 0;
+        if ((*it)->MaxDuration() > 0s)
+        {
+          std::chrono::steady_clock::duration dt = 10ms;
+          iterations = (*it)->MaxDuration() / dt;
+        }
 
-      (*it)->FillResults(testResult);
+        this->dataPtr->server->Run(true, iterations, false);
+        testWatch.Stop();
+
+        timePair = math::durationToSecNsec(testWatch.ElapsedRunTime());
+        testResult->mutable_duration()->set_seconds(timePair.first);
+        testResult->mutable_duration()->set_nanos(timePair.second);
+        if (testResult)
+          passCount++;
+        totalCount++;
+
+        (*it)->FillResults(testResult);
+      }
     }
   }
+  watch.Stop();
 
-  auto scenarioEndTime = std::chrono::steady_clock::now();
-  auto scenarioDuration = scenarioEndTime - scenarioStartTime;
-
-  timePair = math::timePointToSecNsec(scenarioStartTime);
-  result.mutable_start_time()->set_seconds(timePair.first);
-  result.mutable_start_time()->set_nanos(timePair.second);
-
-  timePair = math::durationToSecNsec(scenarioDuration);
+  timePair = math::durationToSecNsec(watch.ElapsedRunTime());
   result.mutable_duration()->set_seconds(timePair.first);
   result.mutable_duration()->set_nanos(timePair.second);
 
-  result.set_pass_count(passCount);
+  result.set_test_count(passCount);
+  result.set_test_pass_count(passCount);
 
   if (!this->dataPtr->baseLogPath.empty() &&
       common::isDirectory(this->dataPtr->baseLogPath))
@@ -496,8 +575,8 @@ void Scenario::SetServerConfig(const gazebo::ServerConfig &_config)
 //////////////////////////////////////////////////
 void Scenario::Implementation::OnSigIntTerm(int)
 {
-  std::cout << "\n\nScenario ON SIG INT\n\n";
   this->run = false;
+  igndbg << "SigInt handler triggered\n";
 
   // Stop the server
   if (this->server)
