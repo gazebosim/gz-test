@@ -103,7 +103,7 @@ class Scenario::Implementation
   public: ProcessManager processManager;
 
   public: common::SignalHandler sigHandler;
-  public: std::unique_ptr<gazebo::Server> server;
+  public: std::unique_ptr<gazebo::Server> server{nullptr};
   public: bool run{false};
 
   public: class Param
@@ -367,6 +367,8 @@ void Scenario::Run()
       for (const std::pair<std::string, Implementation::Param> &param :
           this->dataPtr->iterations[this->dataPtr->iteration])
       {
+        (*iterationResult->mutable_params())[param.first] =
+          param.second.value;
         yamlStr = std::regex_replace(yamlStr,
             std::regex("\\$\\{\\{" + param.first +"\\}\\}"),
             param.second.value);
@@ -455,6 +457,8 @@ void Scenario::Run()
         totalCount++;
 
         (*it)->FillResults(testResult);
+
+        this->dataPtr->server.reset();
       }
     }
   }

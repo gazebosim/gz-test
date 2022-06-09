@@ -48,10 +48,15 @@ message Test
   repeated Trigger triggers = 5;
 }
 
+// \brief An iteration of the set of tests.
 message Iteration
 {
+  /// \brief The parameters used during this iteration. The key is the
+  /// parameter name, and the value is the parameter value.
+  map<string, string> params = 1;
+
   /// \brief The set of tests
-  repeated Test tests = 1;
+  repeated Test tests = 2;
 }
 
 /// \brief Holds information about a peer in the network.
