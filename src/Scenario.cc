@@ -28,6 +28,7 @@
 
 #include <ignition/transport/Node.hh>
 
+#include "msgs/scenario.pb.h"
 #include "websocket_server/WebsocketServer.hh"
 #include "ProcessManager.hh"
 #include "Scenario.hh"
@@ -333,8 +334,8 @@ void Scenario::Run()
   this->dataPtr->run = true;
   std::pair<int64_t, int64_t> timePair;
 
-  ignition::test::msgs::TestResults result;
-  result.set_scenario_name(this->Name());
+  domain::Scenario result;
+  result.set_name(this->Name());
   result.set_description(this->Description());
 
   // Start a stop watch to record the duration of the run.
@@ -358,7 +359,7 @@ void Scenario::Run()
   {
     igndbg << "Running test iteration " << this->dataPtr->iteration << "\n";
 
-    test::msgs::Iteration *iterationResult = result.add_iterations();
+    domain::Iteration *iterationResult = result.add_iterations();
 
     // Create the tests.
     this->dataPtr->tests.clear();
@@ -403,7 +404,7 @@ void Scenario::Run()
         this->dataPtr->serverConfig.SetUseLogRecord(false);
       }
 
-      test::msgs::Test *testResult = iterationResult->add_tests();
+      domain::Test *testResult = iterationResult->add_tests();
       testResult->set_name((*it)->Name());
       timePair = timePointToSecNsec(std::chrono::system_clock::now());
       testResult->mutable_start_time()->set_seconds(timePair.first);

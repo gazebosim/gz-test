@@ -23,7 +23,7 @@
 #include <ignition/gazebo/ServerConfig.hh>
 #include <ignition/gazebo/World.hh>
 
-#include "msgs/results.pb.h"
+#include "msgs/test.pb.h"
 #include "Trigger.hh"
 #include "Util.hh"
 #include "ignition/test/config.hh"
@@ -74,7 +74,7 @@ namespace ignition
       /// \return The name of the test.
       public: std::string Name() const;
 
-      public: void FillResults(ignition::test::msgs::Test *_msg) const;
+      public: void FillResults(domain::Test *_msg) const;
 
       /// \brief Check if a trigger with the given name exists.
       /// \return True if the trigger exists.

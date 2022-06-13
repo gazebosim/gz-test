@@ -139,14 +139,14 @@ void Test::PostUpdate(const gazebo::UpdateInfo &_info,
 }
 
 //////////////////////////////////////////////////
-void Test::FillResults(ignition::test::msgs::Test *_msg) const
+void Test::FillResults(domain::Test *_msg) const
 {
   _msg->set_name(this->Name());
 
   bool allPassed = true;
   for (const std::unique_ptr<Trigger> &trigger : this->triggers)
   {
-    test::msgs::Trigger *triggerMsg = _msg->add_triggers();
+    domain::Trigger *triggerMsg = _msg->add_triggers();
     triggerMsg->set_name(trigger->Name());
     std::optional<bool> triggerResult = trigger->Result();
 
