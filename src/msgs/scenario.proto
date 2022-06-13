@@ -1,0 +1,53 @@
+/*
+ * Copyright (C) 2022 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "iteration.proto";
+
+package domain;
+
+option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
+
+// Scenario groups a set of tests executed by the testing library.
+message Scenario
+{
+  // Name contains the name of the scenario.
+  string name = 1;
+
+  // Description contains the description of the test results.
+  string description = 2;
+
+  // StartTime is the time point, in UTC epoch time, that this tests started.
+  google.protobuf.Timestamp start_time = 3;
+
+  // Duration contains the duration that it took to run this tests.
+  google.protobuf.Duration duration = 4;
+
+  // TestCount contains the number of tests that were run.
+  int32 test_count = 5;
+
+  // TestPassCount contains the number of tests that passed.
+  int32 test_pass_count = 6;
+
+  // Iterations contains each iteration of the tests contained in the scenario.
+  repeated Iteration iterations = 7;
+
+  // GroupId is a unique identifier for the simulation instance that produced the test results.
+  string group_id = 8;
+}
