@@ -50,6 +50,6 @@ private_key=$(cat ~/.ssh/id_rsa)
 shift
 
 rm -rf ign-test
-git clone git@github.com:nkoenig/ign-test
+git clone git@github.com:nkoenig/ign-test -b main
 docker build --rm -t $image_name --build-arg user_id=$user_id .
 rm -rf ign-test

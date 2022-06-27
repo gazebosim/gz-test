@@ -144,7 +144,7 @@ namespace ignition
 
       /// \brief Optional result, where std::nullopt means that there is no
       /// result.
-      private: std::optional<bool> result;
+      private: std::optional<bool> result{std::nullopt};
 
       /// \brief True if the trigger was triggered.
       private: bool triggered{false};

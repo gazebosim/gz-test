@@ -139,7 +139,7 @@ void Test::PostUpdate(const gazebo::UpdateInfo &_info,
 }
 
 //////////////////////////////////////////////////
-void Test::FillResults(domain::Test *_msg) const
+bool Test::FillResults(domain::Test *_msg) const
 {
   _msg->set_name(this->Name());
 
@@ -150,7 +150,7 @@ void Test::FillResults(domain::Test *_msg) const
     triggerMsg->set_name(trigger->Name());
     std::optional<bool> triggerResult = trigger->Result();
 
-    if (triggerResult)
+    if (triggerResult && *triggerResult)
     {
       triggerMsg->set_pass(*triggerResult);
       allPassed = allPassed && *triggerResult;
@@ -162,6 +162,7 @@ void Test::FillResults(domain::Test *_msg) const
   }
 
   _msg->set_pass(allPassed);
+  return allPassed;
 }
 
 //////////////////////////////////////////////////

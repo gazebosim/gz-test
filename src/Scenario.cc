@@ -453,11 +453,11 @@ void Scenario::Run()
         timePair = math::durationToSecNsec(testWatch.ElapsedRunTime());
         testResult->mutable_duration()->set_seconds(timePair.first);
         testResult->mutable_duration()->set_nanos(timePair.second);
-        if (testResult)
+
+        // Fill results, and keep track of the total pass count.
+        if ((*it)->FillResults(testResult))
           passCount++;
         totalCount++;
-
-        (*it)->FillResults(testResult);
 
         this->dataPtr->server.reset();
       }
@@ -469,7 +469,7 @@ void Scenario::Run()
   result.mutable_duration()->set_seconds(timePair.first);
   result.mutable_duration()->set_nanos(timePair.second);
 
-  result.set_test_count(passCount);
+  result.set_test_count(totalCount);
   result.set_test_pass_count(passCount);
 
   if (!this->dataPtr->baseLogPath.empty() &&

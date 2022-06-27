@@ -74,7 +74,10 @@ namespace ignition
       /// \return The name of the test.
       public: std::string Name() const;
 
-      public: void FillResults(domain::Test *_msg) const;
+      /// \brief Fill in a Test message with the results.
+      /// \param[in] _msg The message to populate.
+      /// \return True if the test passed, false otherwise.
+      public: bool FillResults(domain::Test *_msg) const;
 
       /// \brief Check if a trigger with the given name exists.
       /// \return True if the trigger exists.
