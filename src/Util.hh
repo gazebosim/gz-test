@@ -14,21 +14,21 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_TEST_UTILS_HH_
-#define IGNITION_TEST_UTILS_HH_
+#ifndef GZ_TEST_UTILS_HH_
+#define GZ_TEST_UTILS_HH_
 
 #include <yaml-cpp/yaml.h>
-#include <ignition/math/Vector3.hh>
-#include <ignition/math/Pose3.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/math/Pose3.hh>
 
-#include "ignition/test/config.hh"
+#include "gz/test/config.hh"
 
-namespace ignition
+namespace gz
 {
   namespace test
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+    inline namespace GZ_TEST_VERSION_NAMESPACE {
       enum class TimeType
       {
         // Simulation time trigger type

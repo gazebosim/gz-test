@@ -14,19 +14,19 @@
  * limitations under the License.
  *
 */
-#include <ignition/gazebo/Link.hh>
-#include <ignition/gazebo/Model.hh>
-#include <ignition/gazebo/Util.hh>
-#include <ignition/gazebo/components/Model.hh>
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/Pose.hh>
+#include <gz/sim/Link.hh>
+#include <gz/sim/Model.hh>
+#include <gz/sim/Util.hh>
+#include <gz/sim/components/Model.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/Pose.hh>
 
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Helpers.hh>
 
 #include "Util.hh"
 #include "RegionTrigger.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace test;
 
 
@@ -71,7 +71,7 @@ bool RegionTrigger::Load(const YAML::Node &_node)
   }
   else
   {
-    ignerr << "Region trigger is missing a name, skipping.\n";
+    gzerr << "Region trigger is missing a name, skipping.\n";
     return false;
   }
 
@@ -92,7 +92,7 @@ bool RegionTrigger::Load(const YAML::Node &_node)
   }
   else
   {
-    ignerr << "Region trigger[" << this->Name()
+    gzerr << "Region trigger[" << this->Name()
       << "] is missing a geometry, skipping.\n";
     return false;
   }
@@ -100,7 +100,7 @@ bool RegionTrigger::Load(const YAML::Node &_node)
   if (_node["on"])
     this->LoadOnCommands(_node["on"]);
 
-  igndbg << "Created region trigger " << this->Name() << " with box ["
+  gzdbg << "Created region trigger " << this->Name() << " with box ["
     << this->box << "].\n";
 
   std::function<bool(const std::string &)> func =

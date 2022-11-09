@@ -47,14 +47,14 @@
 #include <utility>
 #include <vector>
 
-#include <ignition/common/Console.hh>
-#include <ignition/common/Filesystem.hh>
-#include <ignition/common/TempDirectory.hh>
+#include <gz/common/Console.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/common/TempDirectory.hh>
 
 #include "ProcessManager.hh"
 #include "vendor/backward.hpp"
 
-using namespace ignition::test;
+using namespace gz::test;
 using namespace std::chrono_literals;
 
 #ifdef _WIN32
@@ -144,8 +144,8 @@ class Executable
   public: std::list<std::string> envs;
 };
 
-/// \brief Private data variables for the Ignition class.
-class ignition::test::ProcessManagerPrivate
+/// \brief Private data variables for the Gazebo class.
+class gz::test::ProcessManagerPrivate
 {
   /// \brief Constructor.
   public: ProcessManagerPrivate();
@@ -220,7 +220,7 @@ bool ProcessManager::RunExecutablesAsBash(const std::vector<std::string> &_cmds)
 /////////////////////////////////////////////////
 bool ProcessManager::RunExecutableAsBash(const std::string &_cmd)
 {
-  common::TempDirectory dir("before-script", "ign-test", false);
+  common::TempDirectory dir("before-script", "gz-test", false);
   std::string filename = common::joinPaths(dir.Path(), "script.bash");
   std::ofstream script(filename, std::ofstream::out);
   std::string scriptHeader = R"header(#!/bin/bash
@@ -275,7 +275,7 @@ bool ProcessManager::RunExecutable(const std::string &_name,
   // Check for empty
   if (_cmd.empty())
   {
-    ignerr << "Empty command.\n";
+    gzerr << "Empty command.\n";
     return false;
   }
 #ifdef _WIN32
@@ -290,7 +290,7 @@ bool ProcessManager::RunExecutable(const std::string &_name,
                 sizeof(MYDATA));
   if (pDataArray == nullptr)
   {
-    ignerr << "allocation fails " << GetLastErrorAsString() << '\n';
+    gzerr << "allocation fails " << GetLastErrorAsString() << '\n';
     return false;
   }
 
@@ -320,7 +320,7 @@ bool ProcessManager::RunExecutable(const std::string &_name,
     // Run the command, replacing the current process image
     if (_spawnv(_P_WAIT , cstrings[0], &cstrings[0]) < 0)
     {
-      ignerr << "Unable to run command["
+      gzerr << "Unable to run command["
         << std::accumulate(
             pDataArray->_cmd.begin(),
             pDataArray->_cmd.end(),
@@ -331,7 +331,7 @@ bool ProcessManager::RunExecutable(const std::string &_name,
 
     if (!ReleaseSemaphore(pDataArray->stoppedChildSem, 1, nullptr))
     {
-      ignerr << "Error Releasing Semaphore "
+      gzerr << "Error Releasing Semaphore "
              << GetLastErrorAsString() << std::endl;
     }
 
@@ -348,7 +348,7 @@ bool ProcessManager::RunExecutable(const std::string &_name,
     nullptr, 0, dontThreadOnMe, pDataArray, 0, nullptr);
 
   if (thread == nullptr) {
-    ignerr << "Error creating thread on Windows "
+    gzerr << "Error creating thread on Windows "
            << GetLastErrorAsString() << '\n';
   }
   else
@@ -367,7 +367,7 @@ bool ProcessManager::RunExecutable(const std::string &_name,
   // If parent process...
   if (pid)
   {
-    igndbg << "Forked a process for [" << _name << "] command["
+    gzdbg << "Forked a process for [" << _name << "] command["
       << std::accumulate(std::next(_cmd.begin()), _cmd.end(), _cmd[0],
           [](std::string _ss, std::string _s)
           { return  _ss + " " + _s; }) << "]\n"
@@ -402,7 +402,7 @@ bool ProcessManager::RunExecutable(const std::string &_name,
     // Run the command, replacing the current process image
     if (execvp(cstrings[0], &cstrings[0]) < 0)
     {
-      ignerr << "Unable to run command["
+      gzerr << "Unable to run command["
         << std::accumulate(
             std::next(_cmd.begin()), _cmd.end(), _cmd[0],
             [](std::string _ss, std::string _s)
@@ -437,7 +437,7 @@ void ProcessManager::Stop()
       int retVal = ReleaseSemaphore(myself->stoppedChildSem, 1, nullptr);
       if (retVal != 0)
       {
-        ignerr << "Error Releasing Semaphore: "
+        gzerr << "Error Releasing Semaphore: "
                << GetLastErrorAsString() << std::endl;
       }
 #endif
@@ -446,7 +446,7 @@ void ProcessManager::Stop()
   // Shutdown the processes
   for (const Executable &exec : this->dataPtr->executables)
   {
-    igndbg << "Killing the process[" << exec.name
+    gzdbg << "Killing the process[" << exec.name
 #ifndef _WIN32
       << "] with PID[" << exec.pid << "]\n";
     kill(exec.pid, SIGINT);
@@ -455,7 +455,7 @@ void ProcessManager::Stop()
 #endif
   }
 
-  igndbg << "Waiting for each process to end\n";
+  gzdbg << "Waiting for each process to end\n";
 
   // Wait for all the monitors to stop
   for (std::thread &m : monitors)
@@ -468,7 +468,7 @@ ProcessManagerPrivate::ProcessManagerPrivate()
 #ifndef _WIN32
   // Register a signal handler to capture child process death events.
   if (signal(SIGCHLD, ProcessManagerPrivate::OnSigChild) == SIG_ERR)
-    ignerr << "signal(2) failed while setting up for SIGCHLD" << std::endl;
+    gzerr << "signal(2) failed while setting up for SIGCHLD" << std::endl;
 
   // Register backward signal handler for other signals
   std::vector<int> signals =

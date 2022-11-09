@@ -19,7 +19,7 @@
 #include "TimeTrigger.hh"
 #include "Test.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace test;
 
 /////////////////////////////////////////////////
@@ -44,7 +44,7 @@ bool Test::Load(const YAML::Node &_node)
     }
     else
     {
-      ignerr << "Test [" << this->Name()
+      gzerr << "Test [" << this->Name()
         << "] time-limit is missing a duration. "
         << "Unlimited duration will be used\n";
     }
@@ -59,14 +59,14 @@ bool Test::Load(const YAML::Node &_node)
         this->maxDurationType = TimeType::REAL;
       else
       {
-        ignerr << "Test[" << this->Name()
+        gzerr << "Test[" << this->Name()
           << "] time-limit is missing a time type, using simulation time.\n";
       }
     }
   }
   else
   {
-    ignwarn << "Test[" << this->Name()
+    gzwarn << "Test[" << this->Name()
       << "] is missing a time-limit. Unlimited sim time will be used.\n";
   }
 

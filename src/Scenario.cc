@@ -20,13 +20,13 @@
 #include <sdf/Root.hh>
 #include <sdf/World.hh>
 
-#include <ignition/common/SignalHandler.hh>
-#include <ignition/fuel_tools/Interface.hh>
-#include <ignition/gazebo/Util.hh>
-#include <ignition/gazebo/Server.hh>
-#include <ignition/math/Stopwatch.hh>
+#include <gz/common/SignalHandler.hh>
+#include <gz/fuel_tools/Interface.hh>
+#include <gz/sim/Util.hh>
+#include <gz/sim/Server.hh>
+#include <gz/math/Stopwatch.hh>
 
-#include <ignition/transport/Node.hh>
+#include <gz/transport/Node.hh>
 
 #include "msgs/scenario.pb.h"
 #include "websocket_server/WebsocketServer.hh"
@@ -36,7 +36,7 @@
 #include "TimeTrigger.hh"
 #include "Util.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace test;
 
 class Scenario::Implementation
@@ -69,7 +69,7 @@ class Scenario::Implementation
              // Create the signal handler
              if (!this->sigHandler.Initialized())
              {
-               ignerr << "signal(2) failed while setting up for SIGINT"
+               gzerr << "signal(2) failed while setting up for SIGINT"
                  << std::endl;
              }
              this->sigHandler.AddCallback(
@@ -93,7 +93,7 @@ class Scenario::Implementation
   public: std::string baseLogPath{""};
   public: bool recordSimState = true;
 
-  /// \brief Ignition Transport node.
+  /// \brief Gazebo Transport node.
   public: transport::Node node;
 
   public: transport::Node::Publisher statusPub;
@@ -157,14 +157,14 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
         sdf::Errors errors = root.Load(modelSdfFile);
 
         for (sdf::Error &err : errors)
-          ignerr << err.Message() << std::endl;
+          gzerr << err.Message() << std::endl;
 
         model = *(root.Model());
         model.SetUri(uri);
       }
       else
       {
-        ignerr << "model missing URI, skipping\n";
+        gzerr << "model missing URI, skipping\n";
         continue;
       }
 
@@ -175,7 +175,7 @@ void Scenario::Implementation::LoadConfiguration(const YAML::Node &_config)
       }
       else
       {
-        ignerr << "model missing name, skipping\n";
+        gzerr << "model missing name, skipping\n";
         continue;
       }
 
@@ -258,7 +258,7 @@ bool Scenario::Load(const std::string &_filename,
   }
   catch (YAML::ParserException &_e)
   {
-    ignerr << "Invalid scenario format. Error at line "
+    gzerr << "Invalid scenario format. Error at line "
       << _e.mark.line + 1 << ", column " << _e.mark.column + 1 << ": "
       << _e.msg << std::endl;
     return false;
@@ -289,7 +289,7 @@ bool Scenario::Load(const std::string &_filename,
       this->dataPtr->worldFilename);
   if (worldFilePath.empty())
   {
-    ignerr << "Unable to find world file ["
+    gzerr << "Unable to find world file ["
       << this->dataPtr->worldFilename << "]" << std::endl;
     return false;
   }
@@ -305,9 +305,9 @@ bool Scenario::Load(const std::string &_filename,
   sdf::Errors errors = root.Load(worldFilePath);
   if (!errors.empty())
   {
-    ignerr << "Failed to load SDF world file[" << worldFilePath << "]\n";
+    gzerr << "Failed to load SDF world file[" << worldFilePath << "]\n";
     for (const sdf::Error err : errors)
-      ignerr << err.Message() << std::endl;
+      gzerr << err.Message() << std::endl;
 
     return false;
   }
@@ -320,7 +320,7 @@ bool Scenario::Load(const std::string &_filename,
   this->dataPtr->serverConfig.SetHeadlessRendering(true);
 
   this->dataPtr->statusPub =
-    this->dataPtr->node.Advertise<ignition::msgs::StringMsg>("/test/status");
+    this->dataPtr->node.Advertise<msgs::StringMsg>("/test/status");
 
   this->dataPtr->websocketServer = std::make_unique<WebsocketServer>();
   this->dataPtr->websocketServer->Load();
@@ -439,7 +439,7 @@ void Scenario::Run()
         // \todo Support Running simulation with a simulation or
         // real time limit.
         if ((*it)->MaxDurationType() == TimeType::REAL)
-          ignerr << "Real-time type not supported for time-limit\n";
+          gzerr << "Real-time type not supported for time-limit\n";
         uint64_t iterations = 0;
         if ((*it)->MaxDuration() > 0s)
         {
@@ -492,7 +492,7 @@ void Scenario::Run()
 //////////////////////////////////////////////////
 void Scenario::SendRecordingCompleteMessage()
 {
-  ignition::msgs::StringMsg completeMsg;
+  msgs::StringMsg completeMsg;
   completeMsg.set_data("recording_complete");
   this->dataPtr->statusPub.Publish(completeMsg);
 }
@@ -500,7 +500,7 @@ void Scenario::SendRecordingCompleteMessage()
 //////////////////////////////////////////////////
 void Scenario::SendFinishedMessage()
 {
-  ignition::msgs::StringMsg completeMsg;
+  msgs::StringMsg completeMsg;
   completeMsg.set_data("finished");
   this->dataPtr->statusPub.Publish(completeMsg);
 }

@@ -170,7 +170,7 @@ int httpCallback(struct lws *_wsi,
         // Check that no characters were discarded
         if (n - int(buflen) > 0)
         {
-          ignwarn << "Discarded "
+          gzwarn << "Discarded "
             << n - int(buflen)
             << "characters when preparing metrics.\n";
         }
@@ -268,7 +268,7 @@ int rootCallback(struct lws *_wsi,
 
           if (charsSent < msgSize)
           {
-            ignerr << "Error writing to socket\n";
+            gzerr << "Error writing to socket\n";
           }
           else
           {
@@ -294,7 +294,7 @@ int rootCallback(struct lws *_wsi,
       if (self->maxConnections >= 0 &&
           static_cast<int>(self->connections.size()+1) > self->maxConnections)
       {
-        ignerr << "Skipping new connection, limit of "
+        gzerr << "Skipping new connection, limit of "
           << self->maxConnections << " has been reached\n";
 
         // This will return an error code of 1008 with a reason of
@@ -366,7 +366,7 @@ bool WebsocketServer::Load(const WebsocketServer::Config &_config)//const tinyxm
     }
     catch (...)
     {
-      ignerr << "Unable to convert <publication_hz>" << elem->GetText()
+      gzerr << "Unable to convert <publication_hz>" << elem->GetText()
         << "</publication_hz> to a double. Default hz of "
         << hz << " will be used.\n";
     }
@@ -406,7 +406,7 @@ bool WebsocketServer::Load(const WebsocketServer::Config &_config)//const tinyxm
     }
     catch (...)
     {
-      ignerr << "Failed to convert port[" << elem->GetText() << "] to integer."
+      gzerr << "Failed to convert port[" << elem->GetText() << "] to integer."
         << std::endl;
     }
   }
@@ -423,7 +423,7 @@ bool WebsocketServer::Load(const WebsocketServer::Config &_config)//const tinyxm
     }
     catch (...)
     {
-      ignerr << "Failed to convert max_connections[" << elem->GetText()
+      gzerr << "Failed to convert max_connections[" << elem->GetText()
         << "] to integer." << std::endl;
     }
     igndbg << "Using maximum connection count of "
@@ -443,7 +443,7 @@ bool WebsocketServer::Load(const WebsocketServer::Config &_config)//const tinyxm
     }
     else
     {
-      ignerr << "Failed to parse queue_size_per_connection["
+      gzerr << "Failed to parse queue_size_per_connection["
         << elem->GetText() << "]." << std::endl;
     }
     igndbg << "Using connection msg queue size of "
@@ -473,7 +473,7 @@ bool WebsocketServer::Load(const WebsocketServer::Config &_config)//const tinyxm
         }
         else
         {
-          ignerr << "Failed to parse subscription limit["
+          gzerr << "Failed to parse subscription limit["
             << msgType << ", " << limitElem->GetText() << "]." << std::endl;
         }
       }
@@ -539,7 +539,7 @@ bool WebsocketServer::Load(const WebsocketServer::Config &_config)//const tinyxm
     // Fail if the certificate file cannot be opened.
     if (!ignition::common::exists(sslCertFile))
     {
-      ignerr << "SSL certificate file[" << sslCertFile
+      gzerr << "SSL certificate file[" << sslCertFile
         << "] does not exist. Quitting.\n";
       return false;
     }
@@ -547,7 +547,7 @@ bool WebsocketServer::Load(const WebsocketServer::Config &_config)//const tinyxm
     // Fail if the private key file cannot be opened.
     if (!ignition::common::exists(sslPrivateKeyFile))
     {
-      ignerr << "SSL private key file[" << sslPrivateKeyFile
+      gzerr << "SSL private key file[" << sslPrivateKeyFile
         << "] does not exist. Quitting.\n";
       return false;
     }
@@ -560,7 +560,7 @@ bool WebsocketServer::Load(const WebsocketServer::Config &_config)//const tinyxm
   }
   else if (sslCertFile.empty() || sslPrivateKeyFile.empty())
   {
-    ignwarn << "Partial SSL configuration specified. Please specify: "
+    gzwarn << "Partial SSL configuration specified. Please specify: "
     << "\t<ssl>\n"
     << "\t  <cert_file>PATH_TO_CERT_FILE</cert_file>\n"
     << "\t  <private_key_file>PATH_TO_KEY_FILE</private_key_file>\n"
@@ -577,7 +577,7 @@ bool WebsocketServer::Load(const WebsocketServer::Config &_config)//const tinyxm
 
   this->context = lws_create_context(&info);
   if( !this->context )
-    ignerr << "Unable to create websocket server\n";
+    gzerr << "Unable to create websocket server\n";
 
   return true;
 }
@@ -609,13 +609,13 @@ void WebsocketServer::QueueMessage(Connection *_connection,
       static bool warned{false};
       if (!warned)
       {
-        ignwarn << "Queue size reached for connection" << std::endl;
+        gzwarn << "Queue size reached for connection" << std::endl;
       }
     }
   }
   else
   {
-    ignerr << "Null pointer to a conection. This should not happen.\n";
+    gzerr << "Null pointer to a conection. This should not happen.\n";
   }
 }
 
@@ -696,7 +696,7 @@ void WebsocketServer::OnMessage(int _socketId, const std::string &_msg)
       // Count the number of commas to handle a frame like "sub,,,"
       std::count(_msg.begin(), _msg.end(), ',') != 3)
   {
-    ignerr << "Received an invalid frame with " << frameParts.size()
+    gzerr << "Received an invalid frame with " << frameParts.size()
       << "components when 4 is expected.\n";
     return;
   }
@@ -755,13 +755,13 @@ void WebsocketServer::OnMessage(int _socketId, const std::string &_msg)
           allProtos += descriptor->DebugString();
         else
         {
-          ignerr << "Failed to get the descriptor for message["
+          gzerr << "Failed to get the descriptor for message["
             << type << "]\n";
         }
       }
       else
       {
-        ignerr << "Failed to build message[" << type << "].\n";
+        gzerr << "Failed to build message[" << type << "].\n";
       }
     }
 
@@ -855,7 +855,7 @@ void WebsocketServer::OnMessage(int _socketId, const std::string &_msg)
     bool executed = this->node.Request(serviceName, req, timeout, rep, result);
     if (!executed || !result)
     {
-      ignerr << "Failed to get the scene information for " << frameParts[1]
+      gzerr << "Failed to get the scene information for " << frameParts[1]
         << " world.\n";
     }
 
@@ -885,7 +885,7 @@ void WebsocketServer::OnMessage(int _socketId, const std::string &_msg)
     bool executed = this->node.Request(serviceName, req, timeout, rep, result);
     if (!executed || !result)
     {
-      ignerr << "Failed to get the particle emitter information for "
+      gzerr << "Failed to get the particle emitter information for "
         << frameParts[1] << " world.\n";
     }
 
@@ -989,7 +989,7 @@ void WebsocketServer::OnMessage(int _socketId, const std::string &_msg)
     }
     else
     {
-      ignwarn << "The websocket server is not subscribed to topic["
+      gzwarn << "The websocket server is not subscribed to topic["
         << topic << "]. Unable to unsubscribe from the topic\n";
     }
   }
@@ -1009,7 +1009,7 @@ void WebsocketServer::OnMessage(int _socketId, const std::string &_msg)
       }
       catch (...)
       {
-        ignwarn << "Unable to set topic rate for topic[" << topic
+        gzwarn << "Unable to set topic rate for topic[" << topic
                 << "]" << std::endl;
       }
     }
@@ -1206,7 +1206,7 @@ bool WebsocketServer::UpdateMsgTypeSubscriptionCount(const std::string &_topic,
         }
         if (limitReached)
         {
-          ignwarn << "Msg type subscription limit reached[" << msgType
+          gzwarn << "Msg type subscription limit reached[" << msgType
               << ", " << limitIt->second << "] for connection[" << _socketId
               << "]" << std::endl;
           return false;
@@ -1214,7 +1214,7 @@ bool WebsocketServer::UpdateMsgTypeSubscriptionCount(const std::string &_topic,
       }
       else
       {
-        ignwarn << "Unable to find connection[" << _socketId << "]"
+        gzwarn << "Unable to find connection[" << _socketId << "]"
             << " when setting subscription limit." << std::endl;
         return false;
       }

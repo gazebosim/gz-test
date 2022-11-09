@@ -15,10 +15,10 @@
  *
  */
 
-#ifndef IGNITION_TEST__SUPPRESSWARNING_HH_
-#define IGNITION_TEST__SUPPRESSWARNING_HH_
+#ifndef GZ_TEST__SUPPRESSWARNING_HH_
+#define GZ_TEST__SUPPRESSWARNING_HH_
 
-#include <ignition/test/detail/SuppressWarning.hh>
+#include <gz/test/detail/SuppressWarning.hh>
 
 // This header contains cross-platform macros for suppressing warnings. Please
 // only use these macros responsibly when you are certain that the compiler is
@@ -30,13 +30,13 @@
  * Usage example:
  *
  * SomeClass *ptr = CreatePtr();
- * IGN_TEST_WARN_IGNORE__NON_VIRTUAL_DESTRUCTOR
+ * GZ_TEST_WARN_IGNORE__NON_VIRTUAL_DESTRUCTOR
  * delete ptr;
- * IGN_TEST_WARN_RESUME__NON_VIRTUAL_DESTRUCTOR
+ * GZ_TEST_WARN_RESUME__NON_VIRTUAL_DESTRUCTOR
  *
  */
 
-// Be sure to call the IGN_TEST_WARN_RESUME__XXXXX macro at the end of the
+// Be sure to call the GZ_TEST_WARN_RESUME__XXXXX macro at the end of the
 // block of code where the warning suppression is needed. Otherwise, you might
 // inadvertently suppress legitimate warnings.
 
@@ -48,14 +48,14 @@
 /// We want to suppress this warning when we know for certain (via the design
 /// of our implementation) that the pointer is definitely not pointing to a more
 /// derived type.
-#ifndef IGN_TEST_WARN_IGNORE__NON_VIRTUAL_DESTRUCTOR
-  #define IGN_TEST_WARN_IGNORE__NON_VIRTUAL_DESTRUCTOR \
-    DETAIL_IGN_TEST_WARN_IGNORE__NON_VIRTUAL_DESTRUCTOR
+#ifndef GZ_TEST_WARN_IGNORE__NON_VIRTUAL_DESTRUCTOR
+  #define GZ_TEST_WARN_IGNORE__NON_VIRTUAL_DESTRUCTOR \
+    DETAIL_GZ_TEST_WARN_IGNORE__NON_VIRTUAL_DESTRUCTOR
 #endif
 
-#ifndef IGN_TEST_WARN_RESUME__NON_VIRTUAL_DESTRUCTOR
-  #define IGN_TEST_WARN_RESUME__NON_VIRTUAL_DESTRUCTOR \
-    DETAIL_IGN_TEST_WARN_RESUME__NON_VIRTUAL_DESTRUCTOR
+#ifndef GZ_TEST_WARN_RESUME__NON_VIRTUAL_DESTRUCTOR
+  #define GZ_TEST_WARN_RESUME__NON_VIRTUAL_DESTRUCTOR \
+    DETAIL_GZ_TEST_WARN_RESUME__NON_VIRTUAL_DESTRUCTOR
 #endif
 
 /// \brief Microsoft Visual Studio does not automatically export the interface
@@ -63,29 +63,29 @@
 /// Instead it issues this warning. When the member variable is private, we
 /// choose to suppress the warning instead of needlessly adding the class
 /// information to the DLL interface.
-#ifndef IGN_TEST_WARN_IGNORE__DLL_INTERFACE_MISSING
-  #define IGN_TEST_WARN_IGNORE__DLL_INTERFACE_MISSING \
-    DETAIL_IGN_TEST_WARN_IGNORE__DLL_INTERFACE_MISSING
+#ifndef GZ_TEST_WARN_IGNORE__DLL_INTERFACE_MISSING
+  #define GZ_TEST_WARN_IGNORE__DLL_INTERFACE_MISSING \
+    DETAIL_GZ_TEST_WARN_IGNORE__DLL_INTERFACE_MISSING
 #endif
 
-#ifndef IGN_TEST_WARN_RESUME__DLL_INTERFACE_MISSING
-  #define IGN_TEST_WARN_RESUME__DLL_INTERFACE_MISSING \
-    DETAIL_IGN_TEST_WARN_RESUME__DLL_INTERFACE_MISSING
+#ifndef GZ_TEST_WARN_RESUME__DLL_INTERFACE_MISSING
+  #define GZ_TEST_WARN_RESUME__DLL_INTERFACE_MISSING \
+    DETAIL_GZ_TEST_WARN_RESUME__DLL_INTERFACE_MISSING
 #endif
 
 /// \brief Use this to suppress deprecation warnings. This may be useful when
 /// retaining tests for deprecated methods to preserve code coverage.
-#ifndef IGN_TEST_WARN_IGNORE__DEPRECATED_DECLARATION
-  #define IGN_TEST_WARN_IGNORE__DEPRECATED_DECLARATION \
-    DETAIL_IGN_TEST_WARN_IGNORE__DEPRECATED_DECLARATION
+#ifndef GZ_TEST_WARN_IGNORE__DEPRECATED_DECLARATION
+  #define GZ_TEST_WARN_IGNORE__DEPRECATED_DECLARATION \
+    DETAIL_GZ_TEST_WARN_IGNORE__DEPRECATED_DECLARATION
 #endif
 
-#ifndef IGN_TEST_WARN_RESUME__DEPRECATED_DECLARATION
-  #define IGN_TEST_WARN_RESUME__DEPRECATED_DECLARATION \
-    DETAIL_IGN_TEST_WARN_RESUME__DEPRECATED_DECLARATION
+#ifndef GZ_TEST_WARN_RESUME__DEPRECATED_DECLARATION
+  #define GZ_TEST_WARN_RESUME__DEPRECATED_DECLARATION \
+    DETAIL_GZ_TEST_WARN_RESUME__DEPRECATED_DECLARATION
 #endif
 
 // TODO(anyone): Add more warning types as they become relevant.
 // Do not add warning types to suppress unless they are genuinely necessary.
 
-#endif  // IGNITION_TEST__SUPPRESSWARNING_HH_
+#endif  // GZ_TEST__SUPPRESSWARNING_HH_

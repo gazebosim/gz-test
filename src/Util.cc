@@ -17,18 +17,18 @@
 #include <filesystem>
 #include <numeric>
 
-#include <ignition/common/Filesystem.hh>
-#include <ignition/common/TempDirectory.hh>
-#include <ignition/common/Console.hh>
-#include <ignition/math/Quaternion.hh>
+#include <gz/common/Filesystem.hh>
+#include <gz/common/TempDirectory.hh>
+#include <gz/common/Console.hh>
+#include <gz/math/Quaternion.hh>
 #include "Util.hh"
 
-namespace ignition
+namespace gz
 {
 namespace test
 {
 // Inline bracket to help doxygen filtering.
-inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+inline namespace GZ_TEST_VERSION_NAMESPACE {
 
 //////////////////////////////////////////////////
 math::Vector3d yamlParseVector3d(const YAML::Node &_node)
@@ -73,7 +73,7 @@ bool runExecutablesAsBash(const std::vector<std::string> &_cmds)
 
 bool runExecutableAsBash(const std::string &_cmd)
 {
-  common::TempDirectory dir("before-script", "ign-test", false);
+  common::TempDirectory dir("before-script", "gz-test", false);
   std::string filename = common::joinPaths(dir.Path(), "script.bash");
   std::ofstream script(filename, std::ofstream::out);
   script << "#!/bin/bash\n";
@@ -97,7 +97,7 @@ bool runExecutable(const std::vector<std::string> &_cmd)
   // Check for empty
   if (_cmd.empty())
   {
-    ignerr << "Empty command.\n";
+    gzerr << "Empty command.\n";
     return false;
   }
 
@@ -112,7 +112,7 @@ bool runExecutable(const std::vector<std::string> &_cmd)
                 sizeof(MYDATA));
   if (pDataArray == nullptr)
   {
-    ignerr << "allocation fails " << GetLastErrorAsString() << '\n';
+    gzerr << "allocation fails " << GetLastErrorAsString() << '\n';
     return false;
   }
 
@@ -142,7 +142,7 @@ bool runExecutable(const std::vector<std::string> &_cmd)
     // Run the command, replacing the current process image
     if (_spawnv(_P_WAIT , cstrings[0], &cstrings[0]) < 0)
     {
-      ignerr << "Unable to run command["
+      gzerr << "Unable to run command["
         << std::accumulate(
             pDataArray->_cmd.begin(),
             pDataArray->_cmd.end(),
@@ -153,7 +153,7 @@ bool runExecutable(const std::vector<std::string> &_cmd)
 
     if (!ReleaseSemaphore(pDataArray->stoppedChildSem, 1, nullptr))
     {
-      ignerr << "Error Releasing Semaphore "
+      gzerr << "Error Releasing Semaphore "
              << GetLastErrorAsString() << std::endl;
     }
 
@@ -170,7 +170,7 @@ bool runExecutable(const std::vector<std::string> &_cmd)
     nullptr, 0, dontThreadOnMe, pDataArray, 0, nullptr);
 
   if (thread == nullptr) {
-    ignerr << "Error creating thread on Windows "
+    gzerr << "Error creating thread on Windows "
            << GetLastErrorAsString() << '\n';
   }
   else
@@ -217,7 +217,7 @@ bool runExecutable(const std::vector<std::string> &_cmd)
     // Run the command, replacing the current process image
     if (execvp(cstrings[0], &cstrings[0]) < 0)
     {
-      ignerr << "Unable to run command["
+      gzerr << "Unable to run command["
              << std::accumulate(
                 _cmd.begin(),
                 _cmd.end(),

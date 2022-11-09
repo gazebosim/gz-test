@@ -14,27 +14,27 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_TEST_TRIGGER_HH_
-#define IGNITION_TEST_TRIGGER_HH_
+#ifndef GZ_TEST_TRIGGER_HH_
+#define GZ_TEST_TRIGGER_HH_
 
 #include <yaml-cpp/yaml.h>
 #include <map>
 #include <string>
 #include <vector>
 
-#include <ignition/gazebo/Server.hh>
-#include <ignition/gazebo/ServerConfig.hh>
-#include <ignition/gazebo/World.hh>
+#include <gz/sim/Server.hh>
+#include <gz/sim/ServerConfig.hh>
+#include <gz/sim/World.hh>
 
-#include "ignition/test/config.hh"
+#include "gz/test/config.hh"
 #include "ProcessManager.hh"
 
-namespace ignition
+namespace gz
 {
   namespace test
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+    inline namespace GZ_TEST_VERSION_NAMESPACE {
     class Test;
 
     /// \brief Base class for all test triggers.

@@ -28,14 +28,14 @@ set (sources
 )
 
 # Create the library target
-ign_create_core_library(SOURCES ${sources} CXX_STANDARD 17)
+gz_create_core_library(SOURCES ${sources} CXX_STANDARD 17)
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
-  ignition-gazebo${IGN_GAZEBO_VER}::ignition-gazebo${IGN_GAZEBO_VER}
-  ignition-utils${IGN_UTILS_VER}::cli
-  ignition-fuel_tools${IGN_FUEL_TOOLS_VER}::ignition-fuel_tools${IGN_FUEL_TOOLS_VER}
-  ignition-msgs${IGN_MSGS_MAJOR_VER}::core
-  ignition-transport${IGN_TRANSPORT_MAJOR_VER}::core
+  gz-gazebo${GZ_GAZEBO_VER}::gz-sim${GZ_SIM_VER}
+  gz-utils${GZ_UTILS_VER}::cli
+  gz-fuel_tools${GZ_FUEL_TOOLS_VER}::gz-fuel_tools${GZ_FUEL_TOOLS_VER}
+  gz-msgs${GZ_MSGS_MAJOR_VER}::core
+  gz-transport${GZ_TRANSPORT_MAJOR_VER}::core
   ${YAML_CPP_LIBRARIES}
   PRIVATE
   ${websockets_LIBRARIES}
@@ -48,16 +48,16 @@ endif()
 
 target_compile_definitions(${PROJECT_LIBRARY_TARGET_NAME} PRIVATE ${BACKWARD_DEFINITIONS})
 
-add_executable(ign-test main.cc)
+add_executable(gz-test main.cc)
 target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
 add_dependencies(${PROJECT_LIBRARY_TARGET_NAME}
-  ignition-test_private_msgs
+  gz-test_private_msgs
 )
-target_link_libraries(ign-test
+target_link_libraries(gz-test
     ${PROJECT_LIBRARY_TARGET_NAME}
 )
 
-install (TARGETS ign-test DESTINATION ${BIN_INSTALL_DIR})
+install (TARGETS gz-test DESTINATION ${BIN_INSTALL_DIR})

@@ -16,17 +16,17 @@
 */
 #include <chrono>
 #include <iostream>
-#include <ignition/common/SignalHandler.hh>
-#include <ignition/common/Util.hh>
-#include <ignition/gazebo/Util.hh>
-#include <ignition/gazebo/Server.hh>
-#include <ignition/utils/cli/CLI.hpp>
+#include <gz/common/SignalHandler.hh>
+#include <gz/common/Util.hh>
+#include <gz/gazebo/Util.hh>
+#include <gz/gazebo/Server.hh>
+#include <gz/utils/cli/CLI.hpp>
 
-#include "ignition/test/config.hh"
+#include "gz/test/config.hh"
 
 #include "Scenario.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace test;
 
 std::atomic<bool> kRun = true;
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
   CLI::App app{"Test runner"};
   app.set_help_all_flag("--help-all", "Show all help");
   app.add_flag_callback("--version", [](){
-      std::cout << IGNITION_TEST_VERSION_FULL << std::endl;
+      std::cout << GZ_TEST_VERSION_FULL << std::endl;
       throw CLI::Success();
   });
 
@@ -70,13 +70,13 @@ int main(int argc, char **argv)
   CLI11_PARSE(app, argc, argv);
 
   // Set verbosity
-  ignition::common::Console::SetVerbosity(verbose);
+  common::Console::SetVerbosity(verbose);
 
   // Create the signal handler
   common::SignalHandler sigHandler;
   if (!sigHandler.Initialized())
   {
-    ignerr << "signal(2) failed while setting up for SIGINT" << std::endl;
+    gzerr << "signal(2) failed while setting up for SIGINT" << std::endl;
     return -1;
   }
   sigHandler.AddCallback(std::bind(&onSigIntTerm, std::placeholders::_1));
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
   Scenario scenario;
   if (!scenario.Load(scenarioFilename, outputPath))
   {
-    ignerr << "Failed to load the scenario file[" << scenarioFilename << "]\n";
+    gzerr << "Failed to load the scenario file[" << scenarioFilename << "]\n";
     return -1;
   }
 
@@ -129,7 +129,7 @@ int main(int argc, char **argv)
       {
         scenario.SendRecordingCompleteMessage();
         scenario.SendFinishedMessage();
-        IGN_SLEEP_S(1);
+        GZ_SLEEP_S(1);
       }
     }
   }

@@ -111,7 +111,7 @@ bool Trigger::CheckExpectations(const gazebo::UpdateInfo &_info, Test *_test,
       // Short circuit if assert and result was false
       if (expect.second && !(*r))
       {
-        ignerr << "Assertion\n";
+        gzerr << "Assertion\n";
         return expResult;
       }
 
@@ -129,7 +129,7 @@ bool Trigger::CheckExpectations(const gazebo::UpdateInfo &_info, Test *_test,
       // Short circuit if assert and results was false
       if (expect.second && !(*r))
       {
-        ignerr << "Assertion\n";
+        gzerr << "Assertion\n";
         return expResult;
       }
 
@@ -138,7 +138,7 @@ bool Trigger::CheckExpectations(const gazebo::UpdateInfo &_info, Test *_test,
 
       continue;
     }
-    ignerr << "Invalid expectation[" << exp << "]\n";
+    gzerr << "Invalid expectation[" << exp << "]\n";
   }
   return expResult;
 }
@@ -271,10 +271,10 @@ std::optional<bool> Trigger::ParseEquation(const gazebo::UpdateInfo &_info,
         return *preValue < *sufValue;
       }
       else
-        ignerr << "Invalid equation operation[" << it->str() << "]\n";
+        gzerr << "Invalid equation operation[" << it->str() << "]\n";
     }
     else
-      ignerr << "Unable to parse equation prefix or suffix\n";
+      gzerr << "Unable to parse equation prefix or suffix\n";
   }
   return std::nullopt;
 }
@@ -315,7 +315,7 @@ std::optional<double> Trigger::ParseValue(const std::string &_str,
       }
       else
       {
-        ignerr << "Invalid expectation parameter[" << str << "]\n";
+        gzerr << "Invalid expectation parameter[" << str << "]\n";
       }
     }
     else if (parts[0] == "simulation")
@@ -350,7 +350,7 @@ std::optional<double> Trigger::ParsePoseProperty(const math::Pose3d &_pose,
   else if (prop == "yaw")
     return _pose.Rot().Euler().Z();
   else
-    ignerr << "Unable to get pose value for string[" << prop << "]\n";
+    gzerr << "Unable to get pose value for string[" << prop << "]\n";
 
   return std::nullopt;
 }
@@ -368,7 +368,7 @@ std::optional<bool> Trigger::RunFunction(const std::string &_name,
 {
   if (this->functions.find(_name) != this->functions.end())
     return this->functions[_name](_param);
-  ignerr << "Trigger[" << this->Name() << "] does not have function["
+  gzerr << "Trigger[" << this->Name() << "] does not have function["
     << _name << "]\n";
   return std::nullopt;
 }

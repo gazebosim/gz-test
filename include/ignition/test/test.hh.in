@@ -1,3 +1,0 @@
-// Automatically generated
-#include <ignition/test/config.hh>
-${ign_headers}

@@ -15,15 +15,15 @@
  *
 */
 #include <functional>
-#include <ignition/gazebo/Link.hh>
-#include <ignition/gazebo/Model.hh>
-#include <ignition/gazebo/components/Pose.hh>
+#include <gz/sim/Link.hh>
+#include <gz/sim/Model.hh>
+#include <gz/sim/components/Pose.hh>
 
-#include <ignition/math/Helpers.hh>
+#include <gz/math/Helpers.hh>
 
 #include "TimeTrigger.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace test;
 
 //////////////////////////////////////////////////
@@ -43,7 +43,7 @@ bool TimeTrigger::Load(const YAML::Node &_node)
   }
   else
   {
-    ignerr << "Time trigger is missing a name, skipping.\n";
+    gzerr << "Time trigger is missing a name, skipping.\n";
 
     return false;
   }
@@ -58,7 +58,7 @@ bool TimeTrigger::Load(const YAML::Node &_node)
     }
     else
     {
-      ignerr << "Time trigger[" << this->Name()
+      gzerr << "Time trigger[" << this->Name()
         << "] is missing a duration, skipping.\n";
       return false;
     }
@@ -73,21 +73,21 @@ bool TimeTrigger::Load(const YAML::Node &_node)
         this->type = TimeType::REAL;
       else
       {
-        ignerr << "Time trigger[" << this->Name()
+        gzerr << "Time trigger[" << this->Name()
           << "] is missing a time type, using simulation time.\n";
       }
     }
   }
   else
   {
-    ignerr << "Time trigger[" << this->Name()
+    gzerr << "Time trigger[" << this->Name()
       << "] is missing a time, skipping.\n";
     return false;
   }
 
   Trigger::Load(_node);
 
-  igndbg << "\n\nCreated time trigger " << this->Name() << " with duration "
+  gzdbg << "\n\nCreated time trigger " << this->Name() << " with duration "
     << this->duration.count() << std::endl;
 
   return true;
