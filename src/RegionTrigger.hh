@@ -14,21 +14,22 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_TEST_REGIONTRIGGER_HH_
-#define IGNITION_TEST_REGIONTRIGGER_HH_
+#ifndef GZ_TEST_REGIONTRIGGER_HH_
+#define GZ_TEST_REGIONTRIGGER_HH_
 
 #include <chrono>
-#include <ignition/gazebo/World.hh>
+#include <gz/math/AxisAlignedBox.hh>
+#include <gz/sim/World.hh>
 
-#include "ignition/test/config.hh"
+#include "gz/test/config.hh"
 #include "Trigger.hh"
 
-namespace ignition
+namespace gz
 {
   namespace test
   {
   // Inline bracket to help doxygen filtering.
-  inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+  inline namespace GZ_TEST_VERSION_NAMESPACE {
 
     class RegionTrigger : public Trigger
     {
@@ -38,9 +39,9 @@ namespace ignition
       public: virtual bool Load(const YAML::Node &_node) override;
 
       // Documentation inherited
-      public: void Update(const gazebo::UpdateInfo &_info,
+      public: void Update(const sim::UpdateInfo &_info,
                   Test *_test,
-                  const gazebo::EntityComponentManager &_ecm) override;
+                  const sim::EntityComponentManager &_ecm) override;
 
       public: bool Contains(const std::string &_name);
 

@@ -100,29 +100,29 @@ std::string Test::Name() const
 
 //////////////////////////////////////////////////
 void Test::Configure(
-    const gazebo::Entity &_entity,
+    const sim::Entity &_entity,
     const std::shared_ptr<const sdf::Element> &,
-    gazebo::EntityComponentManager &,
-    gazebo::EventManager &)
+    sim::EntityComponentManager &,
+    sim::EventManager &)
 {
-  this->world = gazebo::World(_entity);
+  this->world = sim::World(_entity);
 }
 
 //////////////////////////////////////////////////
-void Test::PreUpdate(const gazebo::UpdateInfo &,
-    gazebo::EntityComponentManager &)
-{
-}
-
-//////////////////////////////////////////////////
-void Test::Update(const gazebo::UpdateInfo &,
-    gazebo::EntityComponentManager &)
+void Test::PreUpdate(const sim::UpdateInfo &,
+    sim::EntityComponentManager &)
 {
 }
 
 //////////////////////////////////////////////////
-void Test::PostUpdate(const gazebo::UpdateInfo &_info,
-    const gazebo::EntityComponentManager &_ecm)
+void Test::Update(const sim::UpdateInfo &,
+    sim::EntityComponentManager &)
+{
+}
+
+//////////////////////////////////////////////////
+void Test::PostUpdate(const sim::UpdateInfo &_info,
+    const sim::EntityComponentManager &_ecm)
 {
   bool complete = true;
   for (std::unique_ptr<Trigger> &trigger : this->triggers)

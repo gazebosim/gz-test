@@ -48,22 +48,22 @@ namespace gz
       public: Test();
 
       // Configure callback
-      public: void Configure(const gazebo::Entity &_entity,
+      public: void Configure(const sim::Entity &_entity,
                              const std::shared_ptr<const sdf::Element> &_sdf,
-                             gazebo::EntityComponentManager &_ecm,
-                             gazebo::EventManager &_eventMgr) override;
+                             sim::EntityComponentManager &_ecm,
+                             sim::EventManager &_eventMgr) override;
 
       // Pre update update callback
-      public: void PreUpdate(const gazebo::UpdateInfo &_info,
-                  gazebo::EntityComponentManager &_ecm) override;
+      public: void PreUpdate(const sim::UpdateInfo &_info,
+                  sim::EntityComponentManager &_ecm) override;
 
       // Documentation inherited
-      public: void Update(const gazebo::UpdateInfo &_info,
-                    gazebo::EntityComponentManager &_ecm) override;
+      public: void Update(const sim::UpdateInfo &_info,
+                    sim::EntityComponentManager &_ecm) override;
 
       // Post update callback
-      public: void PostUpdate(const gazebo::UpdateInfo &_info,
-                    const gazebo::EntityComponentManager &_ecm) override;
+      public: void PostUpdate(const sim::UpdateInfo &_info,
+                    const sim::EntityComponentManager &_ecm) override;
 
       /// \brief Load a test.
       /// \param[in] _node The YAML node containing test information
@@ -103,7 +103,7 @@ namespace gz
       /// \brief Reset the test. This clears the results.
       public: void Reset();
 
-      private: gazebo::World world;
+      private: sim::World world;
 
       /// \brief Name of the test
       private: std::string name;

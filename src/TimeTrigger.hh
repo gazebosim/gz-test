@@ -14,23 +14,23 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_TEST_TIMETRIGGER_HH_
-#define IGNITION_TEST_TIMETRIGGER_HH_
+#ifndef GZ_TEST_TIMETRIGGER_HH_
+#define GZ_TEST_TIMETRIGGER_HH_
 
 #include <chrono>
 #include <memory>
-#include <ignition/gazebo/World.hh>
+#include <gz/sim/World.hh>
 
-#include "ignition/test/config.hh"
+#include "gz/test/config.hh"
 #include "Util.hh"
 #include "Trigger.hh"
 
-namespace ignition
+namespace gz
 {
   namespace test
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+    inline namespace GZ_TEST_VERSION_NAMESPACE {
     class TimeTrigger : public Trigger
     {
       // Default constructor.
@@ -39,9 +39,9 @@ namespace ignition
       public: virtual bool Load(const YAML::Node &_node) override;
 
       // Documentation inherited
-      public: void Update(const gazebo::UpdateInfo &_info,
+      public: void Update(const sim::UpdateInfo &_info,
                   Test *_testInfo,
-                  const gazebo::EntityComponentManager &_ecm) override;
+                  const sim::EntityComponentManager &_ecm) override;
 
       protected: void ResetImpl() override final;
 

@@ -15,6 +15,7 @@
  *
 */
 #include <yaml-cpp/yaml.h>
+#include <regex>
 
 #include <sdf/Model.hh>
 #include <sdf/Root.hh>
@@ -22,6 +23,7 @@
 
 #include <gz/common/SignalHandler.hh>
 #include <gz/fuel_tools/Interface.hh>
+#include <gz/msgs/stringmsg.pb.h>
 #include <gz/sim/Util.hh>
 #include <gz/sim/Server.hh>
 #include <gz/math/Stopwatch.hh>
@@ -29,7 +31,6 @@
 #include <gz/transport/Node.hh>
 
 #include "msgs/scenario.pb.h"
-#include "websocket_server/WebsocketServer.hh"
 #include "ProcessManager.hh"
 #include "Scenario.hh"
 #include "Test.hh"
@@ -88,7 +89,7 @@ class Scenario::Implementation
   public: std::string worldFilename{""};
   public: std::vector<sdf::Model> models;
   public: std::vector<std::shared_ptr<Test>> tests;
-  public: gazebo::ServerConfig serverConfig;
+  public: sim::ServerConfig serverConfig;
 
   public: std::string baseLogPath{""};
   public: bool recordSimState = true;
@@ -98,13 +99,11 @@ class Scenario::Implementation
 
   public: transport::Node::Publisher statusPub;
 
-  public: std::unique_ptr<WebsocketServer> websocketServer;
-
   public: std::vector<std::string> beforeScript;
   public: ProcessManager processManager;
 
   public: common::SignalHandler sigHandler;
-  public: std::unique_ptr<gazebo::Server> server{nullptr};
+  public: std::unique_ptr<sim::Server> server{nullptr};
   public: bool run{false};
 
   public: class Param
@@ -285,7 +284,7 @@ bool Scenario::Load(const std::string &_filename,
     this->dataPtr->testYaml.push_back(stream.str());
   }
 
-  std::string worldFilePath = gazebo::resolveSdfWorldFile(
+  std::string worldFilePath = sim::resolveSdfWorldFile(
       this->dataPtr->worldFilename);
   if (worldFilePath.empty())
   {
@@ -295,7 +294,7 @@ bool Scenario::Load(const std::string &_filename,
   }
   igndbg << "Resolved world file path[" << worldFilePath << "]\n";
 
-  // \todo I shouldn't have to call this function. The gazebo::Server's
+  // \todo I shouldn't have to call this function. The sim::Server's
   // constructor calls this function, but it's probably not suitable when
   // Gazebo is used a library.
   sdf::setFindCallback(
@@ -306,7 +305,7 @@ bool Scenario::Load(const std::string &_filename,
   if (!errors.empty())
   {
     gzerr << "Failed to load SDF world file[" << worldFilePath << "]\n";
-    for (const sdf::Error err : errors)
+    for (const sdf::Error &err : errors)
       gzerr << err.Message() << std::endl;
 
     return false;
@@ -321,9 +320,6 @@ bool Scenario::Load(const std::string &_filename,
 
   this->dataPtr->statusPub =
     this->dataPtr->node.Advertise<msgs::StringMsg>("/test/status");
-
-  this->dataPtr->websocketServer = std::make_unique<WebsocketServer>();
-  this->dataPtr->websocketServer->Load();
 
   return true;
 }
@@ -347,8 +343,6 @@ void Scenario::Run()
   result.mutable_start_time()->set_seconds(timePair.first);
   result.mutable_start_time()->set_nanos(timePair.second);
 
-  this->dataPtr->websocketServer->RunNonBlocking();
-
   int passCount = 0;
   int totalCount = 0;
   math::Stopwatch testWatch;
@@ -365,8 +359,8 @@ void Scenario::Run()
     this->dataPtr->tests.clear();
     for (std::string yamlStr : this->dataPtr->testYaml)
     {
-      for (const std::pair<std::string, Implementation::Param> &param :
-          this->dataPtr->iterations[this->dataPtr->iteration])
+      for (const std::pair<const std::string, Implementation::Param> &param :
+          this->dataPtr->iterations.at(this->dataPtr->iteration))
       {
         (*iterationResult->mutable_params())[param.first] =
           param.second.value;
@@ -425,7 +419,7 @@ void Scenario::Run()
       if (beforeScriptSuccessful)
       {
         this->dataPtr->server =
-          std::make_unique<gazebo::Server>(this->dataPtr->serverConfig);
+          std::make_unique<sim::Server>(this->dataPtr->serverConfig);
 
         this->dataPtr->server->AddSystem((*it));
 
@@ -566,13 +560,13 @@ void Scenario::SetTests(const std::vector<std::shared_ptr<Test>> &_tests)
 }
 
 //////////////////////////////////////////////////
-gazebo::ServerConfig Scenario::ServerConfig() const
+sim::ServerConfig Scenario::ServerConfig() const
 {
   return this->dataPtr->serverConfig;
 }
 
 //////////////////////////////////////////////////
-void Scenario::SetServerConfig(const gazebo::ServerConfig &_config)
+void Scenario::SetServerConfig(const sim::ServerConfig &_config)
 {
   this->dataPtr->serverConfig = _config;
 }

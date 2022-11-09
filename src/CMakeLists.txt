@@ -1,5 +1,4 @@
 add_subdirectory(msgs)
-add_subdirectory(websocket_server)
 
 set_source_files_properties(
   ${PROTO_PRIVATE_SRC}
@@ -23,7 +22,6 @@ set (sources
   Trigger.cc
   TimeTrigger.cc
   Util.cc
-  websocket_server/WebsocketServer.cc
   ${PROTO_PRIVATE_SRC}
 )
 
@@ -31,14 +29,13 @@ set (sources
 gz_create_core_library(SOURCES ${sources} CXX_STANDARD 17)
 target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
   PUBLIC
-  gz-gazebo${GZ_GAZEBO_VER}::gz-sim${GZ_SIM_VER}
+  gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER}
   gz-utils${GZ_UTILS_VER}::cli
   gz-fuel_tools${GZ_FUEL_TOOLS_VER}::gz-fuel_tools${GZ_FUEL_TOOLS_VER}
   gz-msgs${GZ_MSGS_MAJOR_VER}::core
   gz-transport${GZ_TRANSPORT_MAJOR_VER}::core
   ${YAML_CPP_LIBRARIES}
   PRIVATE
-  ${websockets_LIBRARIES}
   ${BACKWARD_LIBRARIES}
 )
 if (UNIX AND NOT APPLE)

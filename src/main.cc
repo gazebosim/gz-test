@@ -18,8 +18,8 @@
 #include <iostream>
 #include <gz/common/SignalHandler.hh>
 #include <gz/common/Util.hh>
-#include <gz/gazebo/Util.hh>
-#include <gz/gazebo/Server.hh>
+#include <gz/sim/Util.hh>
+#include <gz/sim/Server.hh>
 #include <gz/utils/cli/CLI.hpp>
 
 #include "gz/test/config.hh"

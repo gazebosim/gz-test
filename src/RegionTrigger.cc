@@ -31,16 +31,16 @@ using namespace test;
 
 
 //////////////////////////////////////////////////
-void RegionTrigger::Update(const gazebo::UpdateInfo &_info,
-    Test *_test, const gazebo::EntityComponentManager &_ecm)
+void RegionTrigger::Update(const sim::UpdateInfo &_info,
+    Test *_test, const sim::EntityComponentManager &_ecm)
 {
   // Update what this region contains.
-  _ecm.Each<gazebo::components::Model, gazebo::components::Name>(
-        [&](const gazebo::Entity &_entity,
-            const gazebo::components::Model *,
-            const gazebo::components::Name *_name) -> bool
+  _ecm.Each<sim::components::Model, sim::components::Name>(
+        [&](const sim::Entity &_entity,
+            const sim::components::Model *,
+            const sim::components::Name *_name) -> bool
         {
-          math::Pose3d pose = gazebo::worldPose(_entity, _ecm);
+          math::Pose3d pose = sim::worldPose(_entity, _ecm);
           std::string modelName = _name->Data();
 
           if (this->box.Contains(pose.Pos()))

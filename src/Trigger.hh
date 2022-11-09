@@ -60,8 +60,8 @@ namespace gz
       /// \param[in] _node The YAML node to load.
       public: virtual bool Load(const YAML::Node &_node);
 
-      public: virtual void Update(const gazebo::UpdateInfo &_info, Test *_test,
-                  const gazebo::EntityComponentManager &_ecm) = 0;
+      public: virtual void Update(const sim::UpdateInfo &_info, Test *_test,
+                  const sim::EntityComponentManager &_ecm) = 0;
 
       /// \brief Load all of the "on:" commands.
       /// \param[in] _node The YAML node that has the "on:" tag.
@@ -70,13 +70,13 @@ namespace gz
 
       /// \brief Check the expectationsj
       /// \return True on success.
-      public: bool CheckExpectations(const gazebo::UpdateInfo &_info,
-                  Test *_test, const gazebo::EntityComponentManager &_ecm);
+      public: bool CheckExpectations(const sim::UpdateInfo &_info,
+                  Test *_test, const sim::EntityComponentManager &_ecm);
 
       /// \brief Run the loaded "on:" commands.
       /// \return True on success.
-      public: bool RunOnCommands(const gazebo::UpdateInfo &_info,
-                  Test *_test, const gazebo::EntityComponentManager &_ecm);
+      public: bool RunOnCommands(const sim::UpdateInfo &_info,
+                  Test *_test, const sim::EntityComponentManager &_ecm);
 
       /// \brief Get the trigger name.
       /// \return The trigger's name.
@@ -117,12 +117,12 @@ namespace gz
       protected: virtual void ResetImpl() = 0;
 
       private: std::optional<bool> ParseEquation(
-                   const gazebo::UpdateInfo &_info,
+                   const sim::UpdateInfo &_info,
                    const std::string &_str,
-                   const gazebo::EntityComponentManager &_ecm);
+                   const sim::EntityComponentManager &_ecm);
       private: std::optional<double> ParseValue(const std::string &_str,
-                   const gazebo::UpdateInfo &_info,
-                   const gazebo::EntityComponentManager &_ecm);
+                   const sim::UpdateInfo &_info,
+                   const sim::EntityComponentManager &_ecm);
 
       private: std::optional<double> ParsePoseProperty(
                    const math::Pose3d &_pose,

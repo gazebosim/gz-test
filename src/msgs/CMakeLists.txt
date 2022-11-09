@@ -13,6 +13,6 @@ value_objects.proto
 set(PROTO_PRIVATE_SRC ${PROTO_PRIVATE_SRC} PARENT_SCOPE)
 set(PROTO_PRIVATE_HEADERS ${PROTO_PRIVATE_HEADERS} PARENT_SCOPE)
 
-add_custom_target(ignition-test_private_msgs
+add_custom_target(gz-test_private_msgs
   DEPENDS ${PROTO_PRIVATE_SRC}
 )

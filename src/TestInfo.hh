@@ -14,17 +14,17 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_TEST_TESTINFO_HH_
-#define IGNITION_TEST_TESTINFO_HH_
+#ifndef GZ_TEST_TESTINFO_HH_
+#define GZ_TEST_TESTINFO_HH_
 
 #include <vector>
 
-namespace ignition
+namespace gz
 {
   namespace test
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+    inline namespace GZ_TEST_VERSION_NAMESPACE {
     class Trigger;
     class TestInfo
     {

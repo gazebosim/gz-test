@@ -14,17 +14,17 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_TEST_PROCESSMANAGER_HH_
-#define IGNITION_TEST_PROCESSMANAGER_HH_
+#ifndef GZ_TEST_PROCESSMANAGER_HH_
+#define GZ_TEST_PROCESSMANAGER_HH_
 
-#include "ignition/test/config.hh"
+#include "gz/test/config.hh"
 
-namespace ignition
+namespace gz
 {
   namespace test
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+    inline namespace GZ_TEST_VERSION_NAMESPACE {
     // Forward declaration of the private data class
     class ProcessManagerPrivate;
 
@@ -54,9 +54,9 @@ namespace ignition
       public: void Stop();
 
       /// \brief Private data pointer.
-      // IGN_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
+      // GZ_COMMON_WARN_IGNORE__DLL_INTERFACE_MISSING
       private: std::unique_ptr<ProcessManagerPrivate> dataPtr;
-      // IGN_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
+      // GZ_COMMON_WARN_RESUME__DLL_INTERFACE_MISSING
 
     };
     }

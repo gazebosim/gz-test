@@ -30,15 +30,15 @@
   #include <Processthreadsapi.h>
 #endif
 
-#include "ignition/gazebo/Entity.hh"
-#include "ignition/gazebo/Model.hh"
-#include "ignition/gazebo/Util.hh"
-#include "ignition/gazebo/components/Pose.hh"
+#include "gz/sim/Entity.hh"
+#include "gz/sim/Model.hh"
+#include "gz/sim/Util.hh"
+#include "gz/sim/components/Pose.hh"
 #include "Test.hh"
 #include "Trigger.hh"
 #include "Util.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace test;
 
 /////////////////////////////////////////////////
@@ -91,8 +91,8 @@ bool Trigger::LoadOnCommands(const YAML::Node &_node)
 }
 
 //////////////////////////////////////////////////
-bool Trigger::CheckExpectations(const gazebo::UpdateInfo &_info, Test *_test,
-    const gazebo::EntityComponentManager &_ecm)
+bool Trigger::CheckExpectations(const sim::UpdateInfo &_info, Test *_test,
+    const sim::EntityComponentManager &_ecm)
 {
   bool expResult = true;
   for (const std::pair<std::string, bool> &expect : this->expectations)
@@ -116,7 +116,7 @@ bool Trigger::CheckExpectations(const gazebo::UpdateInfo &_info, Test *_test,
       }
 
       if (!(*r))
-        igndbg << "Expecation[" << exp << "] failed\n";
+        gzdbg << "Expecation[" << exp << "] failed\n";
       continue;
     }
 
@@ -134,7 +134,7 @@ bool Trigger::CheckExpectations(const gazebo::UpdateInfo &_info, Test *_test,
       }
 
       if (!(*r))
-        igndbg << "Expecation[" << exp << "] failed\n";
+        gzdbg << "Expecation[" << exp << "] failed\n";
 
       continue;
     }
@@ -144,8 +144,8 @@ bool Trigger::CheckExpectations(const gazebo::UpdateInfo &_info, Test *_test,
 }
 
 //////////////////////////////////////////////////
-bool Trigger::RunOnCommands(const gazebo::UpdateInfo &_info, Test *_test,
-    const gazebo::EntityComponentManager &_ecm)
+bool Trigger::RunOnCommands(const sim::UpdateInfo &_info, Test *_test,
+    const sim::EntityComponentManager &_ecm)
 {
   if (!this->CheckExpectations(_info, _test, _ecm))
     return false;
@@ -236,9 +236,9 @@ std::optional<bool> Trigger::ParseFunction(Test *_test,
 }
 
 //////////////////////////////////////////////////
-std::optional<bool> Trigger::ParseEquation(const gazebo::UpdateInfo &_info,
+std::optional<bool> Trigger::ParseEquation(const sim::UpdateInfo &_info,
     const std::string &_str,
-    const gazebo::EntityComponentManager &_ecm)
+    const sim::EntityComponentManager &_ecm)
 {
   std::regex reg(R"(==|!=|>=|<=|<|>)");
   auto expBegin = std::sregex_iterator(_str.begin(), _str.end(), reg);
@@ -281,8 +281,8 @@ std::optional<bool> Trigger::ParseEquation(const gazebo::UpdateInfo &_info,
 
 //////////////////////////////////////////////////
 std::optional<double> Trigger::ParseValue(const std::string &_str,
-    const gazebo::UpdateInfo &_info,
-    const gazebo::EntityComponentManager &_ecm)
+    const sim::UpdateInfo &_info,
+    const sim::EntityComponentManager &_ecm)
 {
   std::string str = common::trimmed(_str);
 
@@ -302,15 +302,15 @@ std::optional<double> Trigger::ParseValue(const std::string &_str,
     std::vector<std::string> parts = common::split(str, ".");
 
     // Try to get Gazebo entities based on the name
-    std::unordered_set<gazebo::Entity> entities =
-      gazebo::entitiesFromScopedName(parts[0], _ecm);
+    std::unordered_set<sim::Entity> entities =
+      sim::entitiesFromScopedName(parts[0], _ecm);
 
     if (!entities.empty())
     {
       if (parts.size() == 3 && parts[1] == "pose")
       {
         // Get the pose of the entity
-        math::Pose3d pose = gazebo::worldPose(*entities.begin(), _ecm);
+        math::Pose3d pose = sim::worldPose(*entities.begin(), _ecm);
         return ParsePoseProperty(pose, parts[2]);
       }
       else

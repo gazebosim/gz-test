@@ -10,11 +10,14 @@ project(gz-test1 VERSION 0.1.0)
 #============================================================================
 # If you get an error at this line, you need to install gz-cmake
 find_package(gz-cmake3 REQUIRED)
+set(GZ_CMAKE_VER ${gz-cmake3_VERSION_MAJOR})
 
 #============================================================================
 # Configure the project
 #============================================================================
-set(c++standard 17)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 gz_configure_project(VERSION_SUFFIX)
 
 #============================================================================
@@ -38,12 +41,12 @@ endif()
 #--------------------------------------
 # Find gz-utils
 gz_find_package(gz-utils2 REQUIRED COMPONENTS cli)
-set(GZ_UTILS_VER ${gz-utils1_VERSION_MAJOR})
+set(GZ_UTILS_VER ${gz-utils2_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-fuel_tools
 gz_find_package(gz-fuel_tools8 REQUIRED)
-set(GZ_FUEL_TOOLS_VER ${gz-fuel_tools7_VERSION_MAJOR})
+set(GZ_FUEL_TOOLS_VER ${gz-fuel_tools8_VERSION_MAJOR})
 
 #--------------------------------------
 # Find gz-sim
@@ -61,11 +64,6 @@ gz_find_package(gz-msgs9 REQUIRED)
 set(GZ_MSGS_MAJOR_VER ${gz-msgs9_VERSION_MAJOR})
 
 find_package(yaml-cpp REQUIRED)
-
-gz_pkg_check_modules(websockets libwebsockets)
-if (NOT websockets_FOUND)
-  gz_build_warning("Unable to find libwebsockets. The websocket_server plugin will not be built.")
-endif()
 
 #--------------------------------------
 # Find prerequistes for backward

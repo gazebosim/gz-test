@@ -14,6 +14,8 @@
  * limitations under the License.
  *
 */
+#include <sys/types.h>
+#include <unistd.h>
 #include <filesystem>
 #include <numeric>
 

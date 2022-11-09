@@ -14,21 +14,21 @@
  * limitations under the License.
  *
 */
-#ifndef IGNITION_TEST_SCENARIO_HH_
-#define IGNITION_TEST_SCENARIO_HH_
+#ifndef GZ_TEST_SCENARIO_HH_
+#define GZ_TEST_SCENARIO_HH_
 
-#include <ignition/utils/ImplPtr.hh>
-#include <ignition/gazebo/ServerConfig.hh>
+#include <gz/utils/ImplPtr.hh>
+#include <gz/sim/ServerConfig.hh>
 
-#include "ignition/test/config.hh"
+#include "gz/test/config.hh"
 #include "Test.hh"
 
-namespace ignition
+namespace gz
 {
   namespace test
   {
     // Inline bracket to help doxygen filtering.
-    inline namespace IGNITION_TEST_VERSION_NAMESPACE {
+    inline namespace GZ_TEST_VERSION_NAMESPACE {
     class Scenario
     {
       /// \brief Default constructor.
@@ -85,18 +85,18 @@ namespace ignition
 
       /// \brief Get the server config.
       /// \return The server configuration.
-      public: gazebo::ServerConfig ServerConfig() const;
+      public: sim::ServerConfig ServerConfig() const;
 
       /// \brief Set the server config.
       /// \param[in] _config The server configuration.
-      public: void SetServerConfig(const gazebo::ServerConfig &_config);
+      public: void SetServerConfig(const sim::ServerConfig &_config);
 
       public: void SendRecordingCompleteMessage();
 
       public: void SendFinishedMessage();
 
       /// \brief Private data pointer.
-      IGN_UTILS_IMPL_PTR(dataPtr)
+      GZ_UTILS_IMPL_PTR(dataPtr)
     };
     }
   }
