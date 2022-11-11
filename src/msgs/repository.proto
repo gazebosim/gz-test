@@ -24,6 +24,10 @@ option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
 message Repository {
   // Name is the name of the repository.
   string name = 1;
+
   // Owner is the unique identifier of the user or organization that owns this repository.
   string owner = 2;
+
+  // Link contains a FQDN pointing to this repository in a git provider.
+  string link = 3;
 }

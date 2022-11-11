@@ -16,8 +16,8 @@
 */
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
 import "trigger.proto";
 
 package domain;
@@ -30,8 +30,8 @@ message Test
   // Name contains the name of the test.
   string name = 2;
 
-  // Pass is set to true if all the triggers passed, false otherwise.
-  bool pass = 3;
+  // Passed is set to true if all the triggers passed, false otherwise.
+  bool passed = 3;
 
   // StartTime is the time point, in UTC epoch time, that this test started.
   google.protobuf.Timestamp start_time = 4;

@@ -16,6 +16,8 @@
 */
 syntax = "proto3";
 
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
 import "test.proto";
 
 package domain;
@@ -31,4 +33,22 @@ message Iteration
 
   // Tests groups a set of tests executed by the testing library.
   repeated Test tests = 2;
+
+  // StartTime is the time point, in UTC epoch time,
+  // that this iteration started.
+  google.protobuf.Timestamp start_time = 3;
+
+  // Duration contains the duration that it took to run this iteration.
+  google.protobuf.Duration duration = 4;
+
+  // Passed is true if all the tests in this iteration passed.
+  bool passed = 5;
+
+  // TestCount contains the total number of tests that ran.
+  int32 test_count = 6;
+
+  // TestPassCount contains the number of tests that passed. The count of tests can be used to
+  // determine the number of failed tests, if needed. For example:
+  // `fail_count = test_count - test_pass_count`.
+  int32 test_pass_count = 7;
 }

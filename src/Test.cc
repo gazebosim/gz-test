@@ -152,7 +152,7 @@ bool Test::FillResults(domain::Test *_msg) const
 
     if (triggerResult && *triggerResult)
     {
-      triggerMsg->set_pass(*triggerResult);
+      triggerMsg->set_passed(*triggerResult);
       allPassed = allPassed && *triggerResult;
     }
     else
@@ -161,7 +161,7 @@ bool Test::FillResults(domain::Test *_msg) const
     }
   }
 
-  _msg->set_pass(allPassed);
+  _msg->set_passed(allPassed);
   return allPassed;
 }
 

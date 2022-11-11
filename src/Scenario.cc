@@ -345,7 +345,7 @@ void Scenario::Run()
 
   int passCount = 0;
   int totalCount = 0;
-  math::Stopwatch testWatch;
+  math::Stopwatch iterationWatch, testWatch;
   // Run each iteration
   for (this->dataPtr->iteration= 0;
        this->dataPtr->iteration < this->dataPtr->iterations.size();
@@ -354,6 +354,14 @@ void Scenario::Run()
     igndbg << "Running test iteration " << this->dataPtr->iteration << "\n";
 
     domain::Iteration *iterationResult = result.add_iterations();
+
+    int iterationPassCount = 0;
+    int iterationTotalCount = 0;
+
+    timePair = timePointToSecNsec(std::chrono::system_clock::now());
+    iterationResult->mutable_start_time()->set_seconds(timePair.first);
+    iterationResult->mutable_start_time()->set_nanos(timePair.second);
+    iterationWatch.Start(true);
 
     // Create the tests.
     this->dataPtr->tests.clear();
@@ -450,12 +458,26 @@ void Scenario::Run()
 
         // Fill results, and keep track of the total pass count.
         if ((*it)->FillResults(testResult))
-          passCount++;
-        totalCount++;
+          iterationPassCount++;
+        iterationTotalCount++;
 
         this->dataPtr->server.reset();
       }
     }
+
+    iterationResult->set_passed(iterationPassCount == iterationTotalCount &&
+                                iterationPassCount != 0);
+    iterationResult->set_test_pass_count(iterationPassCount);
+    iterationResult->set_test_count(iterationTotalCount);
+
+
+    iterationWatch.Stop();
+    timePair = math::durationToSecNsec(iterationWatch.ElapsedRunTime());
+    iterationResult->mutable_duration()->set_seconds(timePair.first);
+    iterationResult->mutable_duration()->set_nanos(timePair.second);
+
+    passCount += iterationPassCount;
+    totalCount += iterationTotalCount;
   }
   watch.Stop();
 
@@ -463,8 +485,9 @@ void Scenario::Run()
   result.mutable_duration()->set_seconds(timePair.first);
   result.mutable_duration()->set_nanos(timePair.second);
 
-  result.set_test_count(totalCount);
-  result.set_test_pass_count(passCount);
+  result.set_iteration_count(totalCount);
+  result.set_iteration_pass_count(passCount);
+  result.set_passed(passCount == totalCount && passCount != 0);
 
   if (!this->dataPtr->baseLogPath.empty() &&
       common::isDirectory(this->dataPtr->baseLogPath))
