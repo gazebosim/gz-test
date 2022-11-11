@@ -25,10 +25,10 @@ option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
 // simulation launches with specific configuration.
 message Entrypoint {
   // Name defines the name of the robot that is under test or any other relevant information about the
-  // test itself.
+  // repository itself.
   string name = 1;
   // Image contains a valid OCI image URI.
   string image = 2;
-  // Scenario contains the path to the scenario file from the root folder of the repository.
-  string scenario = 3;
+  // Scenarios contains the paths to the scenario files from the root folder of the repository.
+  repeated string scenarios = 3;
 }

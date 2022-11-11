@@ -20,12 +20,6 @@ package domain;
 
 option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
 
-// SHA is a Commit identifier. It's used across different services to refer to a specific commit.
-message SHA {
-  // Sha contains the SHA value.
-  string sha = 1;
-}
-
 // GroupID is a Simulation identifier. It's used across different services when they need to refer
 // to a specific Simulation.
 message GroupID {

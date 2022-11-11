@@ -39,10 +39,12 @@ message Scenario
   // Duration contains the duration that it took to run this tests.
   google.protobuf.Duration duration = 4;
 
-  // TestCount contains the number of tests that were run.
+  // TestCount contains the total number of tests that ran.
   int32 test_count = 5;
 
-  // TestPassCount contains the number of tests that passed.
+  // TestPassCount contains the number of tests that passed. The count of tests can be used to
+  // determine the number of failed tests, if need. For example:
+  // `int failCount = test_count() - test_pass_count()`.
   int32 test_pass_count = 6;
 
   // Iterations contains each iteration of the tests contained in the scenario.
