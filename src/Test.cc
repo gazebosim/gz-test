@@ -143,26 +143,23 @@ bool Test::FillResults(domain::Test *_msg) const
 {
   _msg->set_name(this->Name());
 
-  bool allPassed = true;
+  bool failed = false;
   for (const std::unique_ptr<Trigger> &trigger : this->triggers)
   {
     domain::Trigger *triggerMsg = _msg->add_triggers();
     triggerMsg->set_name(trigger->Name());
     std::optional<bool> triggerResult = trigger->Result();
 
-    if (triggerResult && *triggerResult)
-    {
-      triggerMsg->set_passed(*triggerResult);
-      allPassed = allPassed && *triggerResult;
-    }
-    else
-    {
-      allPassed = false;
-    }
+    bool triggerFailed = !triggerResult || !(*triggerResult);
+
+    // Set failed if there is no result or the result is false.
+    triggerMsg->set_failed(triggerFailed);
+
+    failed = failed || triggerFailed;
   }
 
-  _msg->set_passed(allPassed);
-  return allPassed;
+  _msg->set_failed(failed);
+  return !failed;
 }
 
 //////////////////////////////////////////////////

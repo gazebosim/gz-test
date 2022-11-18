@@ -41,14 +41,12 @@ message Iteration
   // Duration contains the duration that it took to run this iteration.
   google.protobuf.Duration duration = 4;
 
-  // Passed is true if all the tests in this iteration passed.
-  bool passed = 5;
+  // Failed is true if any test in this iteration failed.
+  bool failed = 5;
 
   // TestCount contains the total number of tests that ran.
   int32 test_count = 6;
 
-  // TestPassCount contains the number of tests that passed. The count of tests can be used to
-  // determine the number of failed tests, if needed. For example:
-  // `fail_count = test_count - test_pass_count`.
-  int32 test_pass_count = 7;
+  // TestFailCount contains the number of tests that failed.
+  int32 test_fail_count = 7;
 }

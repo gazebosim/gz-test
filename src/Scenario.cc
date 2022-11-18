@@ -343,8 +343,11 @@ void Scenario::Run()
   result.mutable_start_time()->set_seconds(timePair.first);
   result.mutable_start_time()->set_nanos(timePair.second);
 
-  int passCount = 0;
-  int totalCount = 0;
+  int scenarioTotalFailCount = 0;
+  int scenarioTotalCount = 0;
+  int scenarioIterationFailCount = 0;
+  int scenarioIterationTotalCount = 0;
+
   math::Stopwatch iterationWatch, testWatch;
   // Run each iteration
   for (this->dataPtr->iteration= 0;
@@ -355,8 +358,8 @@ void Scenario::Run()
 
     domain::Iteration *iterationResult = result.add_iterations();
 
-    int iterationPassCount = 0;
-    int iterationTotalCount = 0;
+    int iterationTestFailCount = 0;
+    int iterationTestCount = 0;
 
     timePair = timePointToSecNsec(std::chrono::system_clock::now());
     iterationResult->mutable_start_time()->set_seconds(timePair.first);
@@ -456,19 +459,18 @@ void Scenario::Run()
         testResult->mutable_duration()->set_seconds(timePair.first);
         testResult->mutable_duration()->set_nanos(timePair.second);
 
-        // Fill results, and keep track of the total pass count.
-        if ((*it)->FillResults(testResult))
-          iterationPassCount++;
-        iterationTotalCount++;
+        // Fill results, and keep track of the fail count.
+        if (!(*it)->FillResults(testResult))
+          iterationTestFailCount++;
+        iterationTestCount++;
 
         this->dataPtr->server.reset();
       }
     }
 
-    iterationResult->set_passed(iterationPassCount == iterationTotalCount &&
-                                iterationPassCount != 0);
-    iterationResult->set_test_pass_count(iterationPassCount);
-    iterationResult->set_test_count(iterationTotalCount);
+    iterationResult->set_failed(iterationTestFailCount > 0);
+    iterationResult->set_test_fail_count(iterationTestFailCount);
+    iterationResult->set_test_count(iterationTestCount);
 
 
     iterationWatch.Stop();
@@ -476,8 +478,11 @@ void Scenario::Run()
     iterationResult->mutable_duration()->set_seconds(timePair.first);
     iterationResult->mutable_duration()->set_nanos(timePair.second);
 
-    passCount += iterationPassCount;
-    totalCount += iterationTotalCount;
+    scenarioTotalFailCount += iterationTestFailCount;
+    scenarioTotalCount += iterationTestCount;
+
+    scenarioIterationFailCount += iterationTestFailCount > 0 ? 1 : 0;
+    scenarioIterationTotalCount++;
   }
   watch.Stop();
 
@@ -485,9 +490,12 @@ void Scenario::Run()
   result.mutable_duration()->set_seconds(timePair.first);
   result.mutable_duration()->set_nanos(timePair.second);
 
-  result.set_iteration_count(totalCount);
-  result.set_iteration_pass_count(passCount);
-  result.set_passed(passCount == totalCount && passCount != 0);
+  result.set_total_test_count(scenarioTotalCount);
+  result.set_total_test_fail_count(scenarioTotalFailCount);
+
+  result.set_iteration_count(scenarioIterationTotalCount);
+  result.set_iteration_fail_count(scenarioIterationFailCount);
+  result.set_failed(scenarioTotalFailCount > 0);
 
   if (!this->dataPtr->baseLogPath.empty() &&
       common::isDirectory(this->dataPtr->baseLogPath))
