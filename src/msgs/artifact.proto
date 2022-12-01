@@ -24,6 +24,7 @@ option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
 message Artifact {
   // Kind defines what type of artifact this is.
   string kind = 1;
+
   // Url contains the URL to download this artifact from.
   string url = 2;
 }

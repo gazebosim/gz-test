@@ -13,10 +13,10 @@ configuration:
   # List of models to place in the world
   models:
     # Each model has a URI, pose and name.
-    - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/X1 UGV"
+    - uri: "https://fuel.gazebosim.org/1.0/OpenRobotics/models/X1 UGV"
       pose: { x: 0.0, y: 0.0, z: 0.2, roll: 0.0, pitch: 0.0, yaw: 0.0 }
       name: x1-a
-    - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/X1 UGV"
+    - uri: "https://fuel.gazebosim.org/1.0/OpenRobotics/models/X1 UGV"
       pose: { x: 0.0, y: 10.0, z: 0.2, roll: 0.0, pitch: 0.0, yaw: 0.0 }
       name: x1-b
 
@@ -48,7 +48,7 @@ tests:
           - expect: ${{x1-a.pose.x == 0.0}}
           # The "run" command executes a command. In this case, it sends a 
           # command velocity to the x1-a robot.
-          - run: 'ign topic -t /model/x1-a/cmd_vel -m ignition.msgs.Twist -p linear:{x:1.0}'
+          - run: 'ign topic -t /model/x1-a/cmd_vel -m gz.msgs.Twist -p linear:{x:1.0}'
 
       # This is a "region" trigger, which requires a box region.
       - name: region-trigger-1

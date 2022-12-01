@@ -27,6 +27,6 @@ message Trigger
   // Name is the name of the trigger.
   string name = 1;
 
-  // Pass contains true if the trigger passed, false otherwise.
-  bool pass = 2;
+  // Failed contains true if the trigger failed, false otherwise.
+  bool failed = 2;
 }

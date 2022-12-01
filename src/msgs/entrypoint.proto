@@ -27,8 +27,10 @@ message Entrypoint {
   // Name defines the name of the robot that is under test or any other relevant information about the
   // repository itself.
   string name = 1;
+
   // Image contains a valid OCI image URI.
   string image = 2;
+
   // Scenarios contains the paths to the scenario files from the root folder of the repository.
   repeated string scenarios = 3;
 }
