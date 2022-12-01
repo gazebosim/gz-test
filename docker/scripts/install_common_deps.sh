@@ -24,11 +24,12 @@ sudo apt-get install --no-install-recommends -y \
   clang-tidy-6.0 \
   python-yaml \
   libyaml-cpp-dev \
-  libclang-6.0-dev
+  libclang-6.0-dev \
+  libgdal-dev \
+  libgts-dev
 
 sudo apt-get install --no-install-recommends -y \
   libbenchmark-dev \
-  libbenchmark1 \
-  libwebsockets-dev
+  libbenchmark1
 
 sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
