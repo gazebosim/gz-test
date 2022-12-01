@@ -47,13 +47,13 @@ message Scenario
   // IterationFailCount contains the number of iterations that failed.
   int32 iteration_fail_count = 6;
 
-  // TotalTestCount contains the total number of tests over all iterations
+  // TestCount contains the total number of tests over all iterations
   // that ran for this scenario.
-  int32 total_test_count = 7;
+  int32 test_count = 7;
 
-  // TotalTestFailCount contains the total number of failed tests over all
+  // TestFailCount contains the total number of failed tests over all
   // iterations that ran for this scenario.
-  int32 total_test_fail_count = 8;
+  int32 test_fail_count = 8;
 
   // Iterations contains each iteration of the tests contained in the scenario.
   repeated Iteration iterations = 9;

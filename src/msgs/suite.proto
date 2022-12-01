@@ -70,13 +70,13 @@ message Suite {
   // passed scenarios by subtracting it from `scenario_count`.
   int32 scenario_fail_count = 11;
 
-  // TotalTestCount contains the total number of tests over all scenarios 
+  // TestCount contains the total number of tests over all scenarios 
   // and iterations that ran for this suite.
-  int32 total_test_count = 12;
+  int32 test_count = 12;
 
-  // TotalTestFaileCount contains the total number of failed tests over all
+  // TestFaileCount contains the total number of failed tests over all
   // scenarios and iterations that ran for this suite.
-  int32 total_test_fail_count = 13;
+  int32 test_fail_count = 13;
 
   // Failed is set to true if any the scenarios failed.
   bool failed = 14;

@@ -490,8 +490,8 @@ void Scenario::Run()
   result.mutable_duration()->set_seconds(timePair.first);
   result.mutable_duration()->set_nanos(timePair.second);
 
-  result.set_total_test_count(scenarioTotalCount);
-  result.set_total_test_fail_count(scenarioTotalFailCount);
+  result.set_test_count(scenarioTotalCount);
+  result.set_test_fail_count(scenarioTotalFailCount);
 
   result.set_iteration_count(scenarioIterationTotalCount);
   result.set_iteration_fail_count(scenarioIterationFailCount);
