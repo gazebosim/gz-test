@@ -2,7 +2,7 @@
 
 # Overview
 
-This tutorial describes how to install Ignition Test on Linux, Mac OS X and
+This tutorial describes how to install Gazebo Test on Linux, Mac OS X and
 Windows via either a binary distribution or from source.
 
 [Install](#install)
@@ -37,10 +37,10 @@ Setup keys:
 wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
 ```
 
-Install Ignition Test:
+Install Gazebo Test:
 
 ```
-sudo apt install libignition-test<#>-dev
+sudo apt install libgz-test<#>-dev
 ```
 
 Be sure to replace `<#>` with a number value, such as 1 or 2, depending on
@@ -56,7 +56,7 @@ necessary prerequisites followed by building from source.
 1. Clone the repository
 
     ```
-    git clone https://github.com/ignitionrobotics/ign-test -b ign-test<#>
+    git clone https://github.com/gazebosim/ign-test -b ign-test<#>
     ```
     Be sure to replace `<#>` with a number value, such as 1 or 2, depending on
     which version you need.
@@ -75,7 +75,7 @@ necessary prerequisites followed by building from source.
     cd ign-test; mkdir build; cd build; cmake ..; make
     ```
 
-4. Optionally, install Ignition Test
+4. Optionally, install Gazebo Test
 
     ```
     sudo make install

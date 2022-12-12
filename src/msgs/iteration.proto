@@ -22,7 +22,7 @@ import "test.proto";
 
 package domain;
 
-option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
+option go_package = "gitlab.com/gazebosim/cloudsim/api/domain";
 
 // Iteration holds one iteration of the set of tests in a Scenario.
 message Iteration

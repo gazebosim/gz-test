@@ -18,7 +18,7 @@ syntax = "proto3";
 
 package domain;
 
-option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
+option go_package = "gitlab.com/gazebosim/cloudsim/api/domain";
 
 // Trigger is an action that represents that a certain event occurred in a test.
 // Triggers are usually user-defined.

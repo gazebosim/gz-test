@@ -18,7 +18,7 @@ syntax = "proto3";
 
 package domain;
 
-option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
+option go_package = "gitlab.com/gazebosim/cloudsim/api/domain";
 
 // Repository contains information about a git repository.
 message Repository {

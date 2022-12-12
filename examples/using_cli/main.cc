@@ -15,10 +15,10 @@
  *
  */
 
-#include <ignition/utils/cli/CLI.hpp>
-#include <ignition/utils/config.hh>
+#include <gz/utils/cli/CLI.hpp>
+#include <gz/utils/config.hh>
 
-/* 
+/*
  * At this point, all functionality of CLI11 will be available.
  * Consult https://github.com/CLIUtils/CLI11 for usage
  */
@@ -26,10 +26,10 @@
 //////////////////////////////////////////////////
 int main(int argc, char** argv)
 {
-  CLI::App app{"Using ignition-utils CLI wrapper"};
+  CLI::App app{"Using gz-utils CLI wrapper"};
 
   app.add_flag_callback("-v,--version", [](){
-      std::cout << IGNITION_UTILS_VERSION_FULL << std::endl;
+      std::cout << GZ_UTILS_VERSION_FULL << std::endl;
       throw CLI::Success();
   });
 

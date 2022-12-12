@@ -23,7 +23,7 @@ import "google/protobuf/duration.proto";
 
 package domain;
 
-option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
+option go_package = "gitlab.com/gazebosim/cloudsim/api/domain";
 
 // Suite contains a group of scenario runs.
 message Suite {

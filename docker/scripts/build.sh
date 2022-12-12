@@ -15,5 +15,4 @@
 ./scripts/build_gz.sh gazebosim gz-gui gz-gui7 
 ./scripts/build_gz.sh gazebosim gz-sensors gz-sensors7
 ./scripts/build_gz.sh gazebosim gz-sim sensor_plugin_autoload
-# ./scripts/build_ign.sh ignitionrobotics ign-launch ign-launch5
-# ./scripts/build_ign.sh nkoenig ign-test main
+# ./scripts/build_gz.sh gazebosim gz-launch gz-launch6

@@ -18,7 +18,7 @@ syntax = "proto3";
 
 package domain;
 
-option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
+option go_package = "gitlab.com/gazebosim/cloudsim/api/domain";
 
 // GroupID is a Simulation identifier. It's used across different services when they need to refer
 // to a specific Simulation.

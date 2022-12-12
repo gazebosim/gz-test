@@ -8,7 +8,7 @@ description: "AMR demo using ROS2"
 configuration:
   # SDF world to use. This can be a Fuel URI, an installed SDF file, an 
   # absolute path, or a relative path to an SDF file.
-  world: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/worlds/industrial-warehouse"
+  world: "https://fuel.gazebosim.org/1.0/OpenRobotics/worlds/industrial-warehouse"
   before_script: 
     - source /opt/ros/galactic/setup.bash
     - source /home/nkoenig/colcon_ws/install/setup.bash
@@ -17,7 +17,7 @@ configuration:
   # List of models to place in the world
   models:
     # Each model has a URI, pose and name.
-    - uri: "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/mp_400"
+    - uri: "https://fuel.gazebosim.org/1.0/OpenRobotics/models/mp_400"
       pose: { x: 3.45, y: 2.15, z: 0.1, roll: 0.0, pitch: 0.0, yaw: 3.1415 }
       name: mp_400
 

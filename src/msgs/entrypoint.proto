@@ -19,7 +19,7 @@ syntax = "proto3";
 
 package domain;
 
-option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
+option go_package = "gitlab.com/gazebosim/cloudsim/api/domain";
 
 // Entrypoint describes the specification of the .gazebo-ci.yml entrypoint file. This file is used to configure
 // simulation launches with specific configuration.

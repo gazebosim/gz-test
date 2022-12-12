@@ -23,7 +23,7 @@ import "artifact.proto";
 
 package domain;
 
-option go_package = "gitlab.com/ignitionrobotics/cloudsim/api/domain";
+option go_package = "gitlab.com/gazebosim/cloudsim/api/domain";
 
 // Scenario groups a set of tests executed by the testing library.
 message Scenario
