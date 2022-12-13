@@ -32,7 +32,7 @@ option(
 #============================================================================
 # Search for project-specific dependencies
 #============================================================================
-if(NOT GZ_TEST_VENDOR_CLI11)
+if(NOT GZ_UTILS_VENDOR_CLI11)
   # PKGCONFIG_IGNORE can be removed once pkg-config support in CLI11 (see
   # https://github.com/CLIUtils/CLI11/pull/523) is released
   gz_find_package(CLI11 REQUIRED_BY cli PKGCONFIG_IGNORE)
