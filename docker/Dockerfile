@@ -37,5 +37,6 @@ RUN cd gz-test; mkdir build;
 WORKDIR /home/$USERNAME/gz-test/build
 RUN cmake ../ -DBUILD_TESTING=false; sudo make install
 
-COPY --chown=$USERNAME:$USERNAME run.bash ./
+WORKDIR /home/$USERNAME
+COPY --chmod=0755 --chown=$USERNAME:$USERNAME run.bash ./
 ENTRYPOINT ["./run.bash"]

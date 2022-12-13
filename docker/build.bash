@@ -51,5 +51,5 @@ shift
 
 rm -rf gz-test
 git clone git@github.com:gazebosim/gz-test -b main
-docker build --rm -t $image_name --build-arg user_id=$user_id .
+DOCKER_BUILDKIT=1 docker build --rm -t $image_name --build-arg user_id=$user_id .
 rm -rf gz-test
