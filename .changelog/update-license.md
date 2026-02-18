@@ -1,1 +1,1 @@
-Update license years from 2012 to 2025
+fix: Update license years from 2012 to 2025
